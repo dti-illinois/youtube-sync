@@ -51,6 +51,6 @@ function GetData() {
         }
     };
 
-    xmlhttp.open("GET","GetData.php", true);
+    xmlhttp.open("GET","/guest-processor", true);
     xmlhttp.send();
 }

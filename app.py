@@ -33,5 +33,11 @@ def set_data():
         return dataFile.read()
 
 
+@app.route('/video-test')
+def video_test():
+    print("Link:")
+    return render_template("video-test.html")
+
+
 if __name__ == '__main__':
     app.run()

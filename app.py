@@ -45,8 +45,12 @@ def set_data():
 
 @app.route('/video-test')
 def video_test():
-    print("Link:")
     return render_template("video-test.html")
+
+
+@app.route('/videojs-freemode')
+def videojs_freemode():
+    return render_template("videojs-freemode.html")
 
 
 if __name__ == '__main__':

@@ -8,14 +8,24 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/guest')
-def guest():
-    return render_template('guest.html')
+@app.route('/guest-youtube')
+def guest_youtube():
+    return render_template('guest-youtube.html')
 
 
-@app.route('/host')
-def host():
-    return render_template('host.html')
+@app.route('/host-youtube')
+def host_youtube():
+    return render_template('host-youtube.html')
+
+
+@app.route('/guest-videojs')
+def guest_videojs():
+    return render_template('guest-videojs.html')
+
+
+@app.route('/host-videojs')
+def host_videojs():
+    return render_template('host-videojs.html')
 
 
 @app.route('/host-processor', methods=['POST'])

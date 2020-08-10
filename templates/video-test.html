@@ -5,9 +5,19 @@
 
         <meta charset="UTF-8">
         <title>Video Player Test Page</title>
+
+        <script>
+            var myVideo;
+
+            function initVideo() {
+                myVideo = videojs('my-video');
+
+                //myVideo.currentTime();
+            }
+        </script>
     </head>
 
-    <body>
+    <body onload="initVideo();">
         <video
             id="my-video"
             class="video-js"
@@ -18,7 +28,6 @@
             poster="MY_VIDEO_POSTER.jpg"
             data-setup="{}">
             <source src="static/MY_VIDEO.mp4" type="video/mp4" />
-            <source src="static/MY_VIDEO.webm" type="video/webm" />
             <p class="vjs-no-js">
                 To view this video please enable JavaScript, and consider upgrading to a web browser that
                 <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
@@ -26,5 +35,7 @@
         </video>
 
         <script src="https://vjs.zencdn.net/7.8.3/video.js"></script>
+
+        <p id="currentTime"></p>
     </body>
 </html>

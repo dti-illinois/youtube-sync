@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link href="https://vjs.zencdn.net/7.8.3/video-js.css" rel="stylesheet" />
+
+        <meta charset="UTF-8">
+        <title>Video Player Test Page</title>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+        <script>
+            var myVideo;
+
+            function initVideo() {
+                myVideo = videojs('my-video');
+
+                //myVideo.currentTime();
+            }
+
+            document.addEventListener("DOMContentLoaded", function() {
+                var intervalID = window.setInterval(GetData, 500);
+            }, false);
+
+            var PlayerData;
+
+            function UpdatePlayer() {
+                if(Math.abs(PlayerData["PlayerTimestamp"] - myVideo.currentTime()) > 0.25) {
+                    myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+                }
+
+                /*if (PlayerData["PlaybackRate"] != player.getPlaybackRate()) {
+                    player.setPlaybackRate(PlayerData["PlaybackRate"]);
+                }*/
+
+                if (PlayerData["Muted"] == true) {
+                    myVideo.volume(0);
+                }
+                else {
+                    myVideo.volume(1);
+                }
+
+                if (PlayerData["Paused"] == true) {
+                    myVideo.pause();
+                }
+                else {
+                    myVideo.play();
+                }
+            }
+
+            function GetData() {
+                var xmlhttp = new XMLHttpRequest();
+
+                xmlhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        PlayerData = JSON.parse(this.responseText);
+                        UpdatePlayer();
+                    }
+                };
+
+                xmlhttp.open("GET","/guest-processor", true);
+                xmlhttp.send();
+            }
+        </script>
+    </head>
+
+    <body onload="initVideo();">
+        <video
+            id="my-video"
+            class="video-js"
+            controls
+            preload="auto"
+            width="640"
+            height="264"
+            poster="MY_VIDEO_POSTER.jpg"
+            data-setup="{}">
+            <source src="static/MY_VIDEO.mp4" type="video/mp4" />
+            <p class="vjs-no-js">
+                To view this video please enable JavaScript, and consider upgrading to a web browser that
+                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+            </p>
+        </video>
+
+        <script src="https://vjs.zencdn.net/7.8.3/video.js"></script>
+
+        <p id="currentTime"></p>
+    </body>
+</html>

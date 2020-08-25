@@ -23,7 +23,9 @@
                 myVideo.on("play", SetData);
                 myVideo.on("pause", SetData);
                 myVideo.on("seeked", function() {
+                    console.log("Setting seeked to true");
                     seeked = true;
+                    sendAgain = true;
                     SetData();
                 });
             }
@@ -43,12 +45,16 @@
             }
 
             function CheckData() {
-                if (Math.abs(PlayerData["PlayerTimestamp"] - myVideo.currentTime()) > 1) {
-                    if (PlayerData["Seeked"] == true || PlayerData["PlayerTimestamp"] > myVideo.currentTime()) {
-                        myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+                if (PlayerData["Seeked"] == true) {
+                    myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+                    SetData();
+                }
+                else if (Math.abs(PlayerData["PlayerTimestamp"] - myVideo.currentTime()) > 1) {
+                    if (Math.abs(PlayerData["PlayerTimestamp"] - myVideo.currentTime()) < 5) {
+                        SetData();
                     }
                     else {
-                        SetData();
+                        myVideo.currentTime(PlayerData["PlayerTimestamp"]);
                     }
                 }
 
@@ -72,7 +78,12 @@
                 type: "POST" ,
                     url: "/host-processor",
                     data: dataToSet,
-                    success: function(data) {},
+                    success: function(data) {
+                        if (sendAgain) {
+                            sendAgain = false;
+                            SetData();
+                        }
+                    },
                     error: function(data) {
                         if (data.responseText != undefined) {
                             alert("Error: " + data.responseText);

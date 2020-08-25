@@ -1,11 +1,53 @@
-<!DOCTYPE html>
-<html>
-  <body>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% extends 'base.html' %}
 
-        <script src="{{ url_for('static', filename='player-youtube.js') }}"></script>
-        <script src="{{ url_for('static', filename='host-youtube.js') }}"></script>
+{% block content %}
+    <script src="{{ url_for('static', filename='player-youtube.js') }}"></script>
+    <script>
+        var oldData;
 
-        <div id="player"></div>
-  </body>
-</html>
+        document.addEventListener("DOMContentLoaded", function() {
+            var intervalID = window.setInterval(SetData, 500);
+        }, false);
+
+        function onPlayerStateChange(event) {
+            SetData();
+        }
+
+        function SetData() {
+            var dataToSet = JSON.stringify({
+                    PlayerTimestamp: player.getCurrentTime(),
+                    PlayerState: player.getPlayerState(),
+                    PlaybackRate: player.getPlaybackRate(),
+                    Muted: player.isMuted()
+                });
+
+            if (oldData != dataToSet) {
+                oldData = dataToSet;
+
+                $.ajax({
+                type: "POST" ,
+                    url: "/host-processor",
+                    data: dataToSet,
+                    success: function(data) {},
+                    error: function(data) {
+                        if (data.responseText != undefined) {
+                            alert("Error: " + data.responseText);
+                        }
+                    }
+                });
+            }
+        }
+
+
+
+    </script>
+
+    <div class="body-container">
+        <h1>YouTube Host</h1>
+        <a href="/">Return to Homepage</a>
+    </div>
+
+    <br><br>
+
+    <div id="player"></div>
+{% endblock %}

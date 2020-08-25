@@ -1,0 +1,51 @@
+@font-face {
+    font-family: Roboto;
+     src: url("fonts/Roboto-Regular.ttf");
+}
+
+body {
+    text-align: center;
+    font-family: Roboto;
+    display: block;
+    background-image: url('lecture-hall.jpg');
+    background-size: cover;
+    color: white;
+    height: 100%;
+}
+
+.body-container {
+    display: inline-block;
+    max-width: 40%;
+}
+
+@media only screen and (max-width: 1000px) {
+    .body-container {
+        max-width: 80vw;
+    }
+
+    #my-video {
+        max-width: 80vw;
+    }
+}
+
+.leftalign {
+    text-align: left;
+}
+
+h1, h3 {
+    text-align: center;
+}
+
+a {
+    color: white;
+}
+
+a:hover {
+    color: lightblue;
+}
+
+video {
+    text-align: center;
+    display: block;
+    margin: 0 auto;
+}

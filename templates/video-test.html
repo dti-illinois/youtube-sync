@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <link href="https://vjs.zencdn.net/7.8.3/video-js.css" rel="stylesheet" />
+{% extends 'base.html' %}
 
-        <meta charset="UTF-8">
-        <title>Video Player Test Page</title>
-
+{% block content %}
         <script>
             var myVideo;
 
@@ -15,9 +10,13 @@
                 //myVideo.currentTime();
             }
         </script>
-    </head>
 
-    <body onload="initVideo();">
+    <div onload="initVideo();">
+        <div class="body-container">
+            <h1>Video.js Player Test Page</h1>
+            <a href="/">Return to Homepage</a>
+        </div>
+
         <video
             id="my-video"
             class="video-js"
@@ -37,5 +36,5 @@
         <script src="https://vjs.zencdn.net/7.8.3/video.js"></script>
 
         <p id="currentTime"></p>
-    </body>
-</html>
+    </div>
+{% endblock %}

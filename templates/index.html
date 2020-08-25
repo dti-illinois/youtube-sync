@@ -1,26 +1,30 @@
-<!DOCTYPE html>
-<html>
-  <body>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% extends 'base.html' %}
 
+{% block content %}
+    <div class="body-container leftalign">
         <h1>Welcome to Youtube-Sync</h1>
 
-        <h2>YouTube Guest/Host Tests</h2>
+        <h3>Click one of the below links to test the project.</h3>
+
+        <b>Video.js Freemode Tests</b>
+        <p>The latest version of this project. Uses the Video.js player. Supports up to 4 users, and any user can control the video.</p>
         <ul>
-            <li><a href="guest-youtube">Join a Session</a></li>
-            <li><a href="host-youtube">Create a Session</a></li>
+            <li><a href="videojs-freemode">Join/Host a Session</a></li>
         </ul>
 
-        <h2>Video.js Guest/Host Tests</h2>
+        <b>Video.js Guest/Host Tests</b>
+        <p>The previous version of this project. Uses the Video.js player. Supports up to 4 users, but only 1 user can act as the "host" and control the video.</p>
         <ul>
             <li><a href="video-test">Video Player Test Page</a></li>
             <li><a href="guest-videojs">Join a Session</a></li>
-            <li><a href="host-videojs">Create a Session</a></li>
+            <li><a href="host-videojs">Host a Session</a></li>
         </ul>
 
-        <h2>Video.js Freemode Tests</h2>
+        <b>YouTube Guest/Host Tests</b>
+        <p>The original version of this project. Uses the YouTube embed player. Supports up to 4 users, but only 1 user can act as the "host" and control the video. The YouTube player is no longer used because it would not be possible to implement Freemode technology due to limited control using the API.</p>
         <ul>
-            <li><a href="videojs-freemode">Join a Session</a></li>
+            <li><a href="guest-youtube">Join a Session</a></li>
+            <li><a href="host-youtube">Host a Session</a></li>
         </ul>
-  </body>
-</html>
+    </div>
+{% endblock %}

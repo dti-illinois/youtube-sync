@@ -1,118 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <link href="https://vjs.zencdn.net/7.8.3/video-js.css" rel="stylesheet" />
+{% extends 'base.html' %}
 
-        <meta charset="UTF-8">
-        <title>Video Player Test Page</title>
+{% block content %}
+    <script>
+        var myVideo, my_video, PlayerData;
+        var PlayerMuted = false;
+        var seeked = false;
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var intervalID = window.setInterval(GetData, 1000);
+        }, false);
 
-        <script>
-            var myVideo, my_video, PlayerData;
-            var PlayerMuted = false;
-            var seeked = false;
+        function initVideo() {
+            myVideo = videojs('my-video');
 
-            document.addEventListener("DOMContentLoaded", function() {
-                var intervalID = window.setInterval(GetData, 1000);
-            }, false);
+            myVideo.on("play", SetData);
+            myVideo.on("pause", SetData);
+            myVideo.on("seeked", function() {
+                console.log("Setting seeked to true");
+                seeked = true;
+                sendAgain = true;
+                SetData();
+            });
+        }
 
-            function initVideo() {
-                myVideo = videojs('my-video');
+        function GetData() {
+            var xmlhttp = new XMLHttpRequest();
 
-                myVideo.on("play", SetData);
-                myVideo.on("pause", SetData);
-                myVideo.on("seeked", function() {
-                    console.log("Setting seeked to true");
-                    seeked = true;
-                    sendAgain = true;
-                    SetData();
-                });
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    PlayerData = JSON.parse(this.responseText);
+                    CheckData();
+                }
+            };
+
+            xmlhttp.open("GET","/guest-processor", true);
+            xmlhttp.send();
+        }
+
+        function CheckData() {
+            if (PlayerData["Seeked"] == true) {
+                myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+                SetData();
             }
-
-            function GetData() {
-                var xmlhttp = new XMLHttpRequest();
-
-                xmlhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        PlayerData = JSON.parse(this.responseText);
-                        CheckData();
-                    }
-                };
-
-                xmlhttp.open("GET","/guest-processor", true);
-                xmlhttp.send();
-            }
-
-            function CheckData() {
-                if (PlayerData["Seeked"] == true) {
-                    myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+            else if (Math.abs(PlayerData["PlayerTimestamp"] - myVideo.currentTime()) > 1) {
+                if (Math.abs(PlayerData["PlayerTimestamp"] - myVideo.currentTime()) < 5) {
                     SetData();
                 }
-                else if (Math.abs(PlayerData["PlayerTimestamp"] - myVideo.currentTime()) > 1) {
-                    if (Math.abs(PlayerData["PlayerTimestamp"] - myVideo.currentTime()) < 5) {
+                else {
+                    myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+                }
+            }
+
+            if (PlayerData["Paused"] != myVideo.paused()) {
+                if (PlayerData["Paused"])
+                    myVideo.pause();
+                else
+                    myVideo.play();
+            }
+        }
+
+        function SetData() {
+            var dataToSet = JSON.stringify({
+                    PlayerTimestamp: myVideo.currentTime(),
+                    Paused: myVideo.paused(),
+                    Seeked: seeked
+            });
+            seeked = false;
+
+            $.ajax({
+            type: "POST" ,
+                url: "/host-processor",
+                data: dataToSet,
+                success: function(data) {
+                    if (sendAgain) {
+                        sendAgain = false;
                         SetData();
                     }
-                    else {
-                        myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+                },
+                error: function(data) {
+                    if (data.responseText != undefined) {
+                        alert("Error: " + data.responseText);
                     }
                 }
+            });
+        }
+    </script>
 
-                if (PlayerData["Paused"] != myVideo.paused()) {
-                    if (PlayerData["Paused"])
-                        myVideo.pause();
-                    else
-                        myVideo.play();
-                }
-            }
+    <div class="body-container">
+        <h1>Video.js Freemode</h1>
+        <a href="/">Return to Homepage</a>
+    </div>
 
-            function SetData() {
-                var dataToSet = JSON.stringify({
-                        PlayerTimestamp: myVideo.currentTime(),
-                        Paused: myVideo.paused(),
-                        Seeked: seeked
-                });
-                seeked = false;
-
-                $.ajax({
-                type: "POST" ,
-                    url: "/host-processor",
-                    data: dataToSet,
-                    success: function(data) {
-                        if (sendAgain) {
-                            sendAgain = false;
-                            SetData();
-                        }
-                    },
-                    error: function(data) {
-                        if (data.responseText != undefined) {
-                            alert("Error: " + data.responseText);
-                        }
-                    }
-                });
-            }
-        </script>
-    </head>
-
-    <body onload="initVideo();">
-        <video
-            id="my-video"
-            class="video-js"
-            controls
-            preload="auto"
-            width="640"
-            height="264"
-            poster="MY_VIDEO_POSTER.jpg"
-            data-setup="{}">
-                <source src="static/MY_VIDEO.mp4" type="video/mp4" />
-                <p class="vjs-no-js">
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-                </p>
-        </video>
-
-        <script src="https://vjs.zencdn.net/7.8.3/video.js"></script>
-
-        <p id="currentTime"></p>
-    </body>
-</html>
+    <video
+        id="my-video"
+        class="video-js"
+        controls
+        preload="auto"
+        poster="MY_VIDEO_POSTER.jpg"
+        data-setup="{}">
+            <source src="static/MY_VIDEO.mp4" type="video/mp4" />
+            <p class="vjs-no-js">
+                To view this video please enable JavaScript, and consider upgrading to a web browser that
+                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+            </p>
+    </video>
+{% endblock %}

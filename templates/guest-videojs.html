@@ -1,20 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <link href="https://vjs.zencdn.net/7.8.3/video-js.css" rel="stylesheet" />
-
-        <meta charset="UTF-8">
-        <title>Video Player Test Page</title>
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
         <script>
             var myVideo;
 
             function initVideo() {
                 myVideo = videojs('my-video');
-
-                //myVideo.currentTime();
             }
 
             document.addEventListener("DOMContentLoaded", function() {
@@ -64,6 +56,11 @@
     </head>
 
     <body onload="initVideo();">
+        <div class="body-container">
+            <h1>Video.js Guest</h1>
+            <a href="/">Return to Homepage</a>
+        </div>
+
         <video
             id="my-video"
             class="video-js"

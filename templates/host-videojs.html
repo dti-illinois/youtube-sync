@@ -1,60 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <link href="https://vjs.zencdn.net/7.8.3/video-js.css" rel="stylesheet" />
+{% extends 'base.html' %}
 
-        <meta charset="UTF-8">
-        <title>Video Player Test Page</title>
+{% block content %}
+    <script>
+        var oldData;
+        var myVideo;
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        function initVideo() {
+            myVideo = videojs('my-video');
 
-        <script>
-            var oldData;
-            var myVideo;
+            //myVideo.currentTime();
+        }
 
-            function initVideo() {
-                myVideo = videojs('my-video');
+        document.addEventListener("DOMContentLoaded", function() {
+            var intervalID = window.setInterval(SetData, 500);
+        }, false);
 
-                //myVideo.currentTime();
-            }
+        function onPlayerStateChange(event) {
+            SetData();
+        }
 
-            document.addEventListener("DOMContentLoaded", function() {
-                var intervalID = window.setInterval(SetData, 500);
-            }, false);
+        function SetData() {
+            var dataToSet = JSON.stringify({
+                    PlayerTimestamp: myVideo.currentTime(),
+                    Paused: myVideo.paused(),
+                    Muted: myVideo.muted()
+                });
 
-            function onPlayerStateChange(event) {
-                SetData();
-            }
+            if (oldData != dataToSet) {
+                oldData = dataToSet;
 
-            function SetData() {
-                var dataToSet = JSON.stringify({
-                        PlayerTimestamp: myVideo.currentTime(),
-                        Paused: myVideo.paused(),
-                        Muted: myVideo.muted()
-                    });
-
-                if (oldData != dataToSet) {
-                    oldData = dataToSet;
-
-                    $.ajax({
-                    type: "POST" ,
-                        url: "/host-processor",
-                        data: dataToSet,
-                        success: function(data) {},
-                        error: function(data) {
-                            if (data.responseText != undefined) {
-                                alert("Error: " + data.responseText);
-                            }
+                $.ajax({
+                type: "POST" ,
+                    url: "/host-processor",
+                    data: dataToSet,
+                    success: function(data) {},
+                    error: function(data) {
+                        if (data.responseText != undefined) {
+                            alert("Error: " + data.responseText);
                         }
-                    });
-                }
+                    }
+                });
             }
+        }
 
 
-        </script>
-    </head>
+    </script>
 
-    <body onload="initVideo();">
+    <div onload="initVideo();">
+        <div class="body-container">
+            <h1>Video.js Host</h1>
+            <a href="/">Return to Homepage</a>
+        </div>
+
         <video
             id="my-video"
             class="video-js"
@@ -74,5 +71,5 @@
         <script src="https://vjs.zencdn.net/7.8.3/video.js"></script>
 
         <p id="currentTime"></p>
-    </body>
-</html>
+    </div>
+{% endblock %}

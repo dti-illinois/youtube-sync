@@ -1,6 +1,10 @@
+import json
 from flask import (Flask, render_template, request, jsonify)
+from flask_socketio import (SocketIO, send, emit)
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, cors_allowed_origins='http://127.0.0.1:5000')
 
 
 @app.route('/')
@@ -53,5 +57,25 @@ def videojs_freemode():
     return render_template("videojs-freemode.html")
 
 
+@app.route('/websockets-test')
+def websockets_test():
+    return render_template("websockets-test.html")
+
+
+@socketio.on('message')
+def handle_message(message):
+    print('Received message: ' + str(message))
+
+
+@socketio.on('connect')
+def test_connect():
+    send({"type": "connection_status", "value": True})
+
+
+@socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
+
+
 if __name__ == '__main__':
-    app.run()
+    socketio.run(app)

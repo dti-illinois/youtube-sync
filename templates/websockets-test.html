@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+
+    <script>
+        var socket, stuff;
+
+        function initVideo() {
+            // sending a connect request to the server.
+            socket = io.connect('localhost:5000');
+
+            // Connection opened
+            socket.addEventListener('open', function (event) {
+                socket.send('Hello Server!');
+            });
+
+            // Listen for messages
+            socket.addEventListener('message', function (event) {
+                if (event["type"] == "connection_status") {
+                    if (event["value"] == true) {
+                        console.log("Successfully connected to WebSockets!");
+                    }
+                }
+                else
+                    console.log('Message from server: ', event);
+            });
+        }
+    </script>
+
+    <div class="body-container">
+        <h1>WebSockets Test Page</h1>
+        <a href="/">Return to Homepage</a>
+
+        <br><br>
+
+        <input type="text" id="message-contents" placeholder="Text message" />
+        <button value="Send Message" onclick="socket.send(document.getElementById('message-contents').value)">Send Text Message</button>
+
+        <br><br>
+
+        <input type="text" id="json-message-contents" placeholder="JSON formatted message" />
+        <button value="Send Message" onclick="socket.send(JSON.parse(document.getElementById('json-message-contents').value))">Send JSON Message</button>
+    </div>
+{% endblock %}

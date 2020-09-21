@@ -3,6 +3,6 @@
 set -e
 
 export FLASK_APP=app.py
-export FLASK_RUN_PORT=3000
+export FLASK_RUN_PORT=5000
 
 flask run

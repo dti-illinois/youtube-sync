@@ -4,7 +4,7 @@ from flask_socketio import (SocketIO, send, emit)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, cors_allowed_origins='http://127.0.0.1:3000')
+socketio = SocketIO(app, cors_allowed_origins='http://127.0.0.1:5000')
 
 
 @app.route('/')

@@ -4,7 +4,7 @@ from app import app
 
 subdirectory_app = DispatcherMiddleware(
     None, {
-        '/cuphd': app
+        '/app': app
     }
 )
 

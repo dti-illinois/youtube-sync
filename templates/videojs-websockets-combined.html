@@ -23,7 +23,6 @@
             socket = io.connect('localhost:5000');
 
             document.getElementById("form").style.display = "none";
-            document.getElementById("video-container").style.display = "initial";
 
             // If the user is a host
             if (role == 0) {
@@ -36,6 +35,7 @@
         }
 
         function StartSession() {
+            document.getElementById("video-container").style.display = "initial";
             document.getElementById("users-list-host").style.display = "inline-block";
             document.getElementById("host-notice").style.display = "initial";
 
@@ -75,23 +75,21 @@
         }
 
         function JoinSession() {
-            document.getElementById("users-list-guest").style.display = "inline-block";
+            document.getElementById("joining-session").style.display = "initial";
+            document.getElementById("error-display").style.display = "none";
             socket.send({"type":"join","role":"guest","name":username});
 
             myVideo.on("play", function () {
                 if (updatingPlayer == false)
                     socket.send({"type":"guest_data", "action": "play", "timestamp": 0})
-                updatingPlayer = false;
             });
             myVideo.on("pause", function () {
                 if (updatingPlayer == false)
                     socket.send({"type":"guest_data", "action": "pause", "timestamp": 0})
-                updatingPlayer = false;
             });
             myVideo.on("seeked", function () {
                 if (updatingPlayer == false)
                     socket.send({"type":"guest_data", "action": "seek", "timestamp": myVideo.currentTime()})
-                updatingPlayer = false;
             });
 
             socket.addEventListener('message', function (event) {
@@ -99,6 +97,7 @@
                     document.getElementById("form").style.display = "initial";
                     document.getElementById("video-container").style.display = "none";
                     document.getElementById("session-closed").style.display = "initial";
+                    document.getElementById("users-list-guest").style.display = "none";
                 }
                 else if (event["type"] == "user_data") {
                     var userData = event["data"];
@@ -113,11 +112,47 @@
                 else if (event["type"] == "player_data") {
                     UpdatePlayer(JSON.parse(event["data"]));
                 }
+                else if (event["type"] == "join_request_response") {
+                    document.getElementById("joining-session").style.display = "none";
+
+                    if (event["value"] == false) {
+                        socket.close();
+                        document.getElementById("form").style.display = "initial";
+
+                        if (event["reason"] == "username_not_unique") {
+                            document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
+                            document.getElementById("error-display").style.display = "initial";
+                        }
+                        else if (event["reason"] == "username_too_long") {
+                            document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username must be less than 20 characters.<br><br>";
+                            document.getElementById("error-display").style.display = "initial";
+                        }
+                        else if (event["reason"] == "username_special_characters") {
+                            document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot have the characters < or >.<br><br>";
+                            document.getElementById("error-display").style.display = "initial";
+                        }
+                        else if (event["reason"] == "username_blank") {
+                            document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot be blank.<br><br>";
+                            document.getElementById("error-display").style.display = "initial";
+                        }
+                    }
+                    else {
+                        document.getElementById("video-container").style.display = "initial";
+                        document.getElementById("users-list-guest").style.display = "inline-block";
+                        document.getElementById("error-display").style.display = "none";
+                    }
+                }
             });
         }
 
         function initVideo() {
             myVideo = videojs('my-video');
+
+            document.getElementById("username_input").onkeypress = function(e) {
+                if (e.which == 60 || e.which == 62) {
+                    e.preventDefault();
+                }
+            }
         }
 
         function SetData() {
@@ -131,6 +166,7 @@
 
         function UpdatePlayer(PlayerData) {
             updatingPlayer = true;
+            setTimeout(function() {updatingPlayer = false}, 1000);
             myVideo.currentTime(PlayerData["PlayerTimestamp"]);
 
             if (PlayerData["Paused"] == true) {
@@ -159,6 +195,8 @@
             <button class="btn btn-success" onclick="session_begin()" id="btnStartSession" disabled>Join Session</button>
         </div>
 
+        <p id="joining-session" style="display: none"><br><br>Joining session, please wait...<br><br></p>
+        <p id="error-display" style="display: none; color: red;"></p>
         <p id="host-notice" style="display: none;">Warning: If you close this tab or navigate to a different site, all other users will be disconnected from the session.<br><br></p>
     </div>
 

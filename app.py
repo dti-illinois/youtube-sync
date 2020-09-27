@@ -82,9 +82,26 @@ def videojs_websockets_combined():
 def handle_message(message):
     print('Received message: ' + str(message))
     if message["type"] == "join" and message["role"] == "guest":
-        send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
-        users.append({"role": "guest", "username": message["name"]})
-        send({"type": "user_data", "data": users}, broadcast=True)
+        print("Recieved join request")
+        if len(message["name"]) > 20:
+            send({"type": "join_request_response", "value": False, "reason": "username_too_long"})
+        elif "<" in message["name"] or ">" in message["name"]:
+            send({"type": "join_request_response", "value": False, "reason": "username_special_characters"})
+        elif message["name"] == "":
+            send({"type": "join_request_response", "value": False, "reason": "username_blank"})
+        else:
+            success_joining = True
+            for user in users:
+                if user["username"] == message["name"]:
+                    success_joining = False
+                    print("Unique username error")
+            if success_joining == False:
+                send({"type": "join_request_response", "value": False, "reason": "username_not_unique"})
+            else:
+                send({"type": "join_request_response", "value": True})
+                send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
+                users.append({"role": "guest", "username": message["name"]})
+                send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "join" and message["role"] == "host":
         users.append({"role": "host", "username": message["name"]})
         send({"type": "user_data", "data": users}, broadcast=True)

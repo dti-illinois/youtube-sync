@@ -28,7 +28,7 @@
 
             document.getElementById("form").style.display = "none";
             document.getElementById("video-container").style.display = "initial";
-            document.getElementById("users-list").style.display = "initial";
+            document.getElementById("users-list").style.display = "inline-block";
 
             socket = io.connect('localhost:5000');
 
@@ -64,8 +64,8 @@
         }
 
         function UpdateUsers() {
-            document.getElementById("users-list").innerHTML = "Current Users:";
-            users.forEach(element => document.getElementById("users-list").innerHTML += "\n" + element);
+            document.getElementById("users-list").innerHTML = "<h2 style='margin: 0;'>Current Users:</h2>";
+            users.forEach(element => document.getElementById("users-list").innerHTML += ("<br> - " + element));
         }
 
         function initVideo() {
@@ -97,24 +97,30 @@
 
         <br><br>
 
-        <textarea id="users-list" rows="10" cols="50" style="display: none;">Current Users:</textarea>
+    <table>
+        <tr>
+            <td style="padding-right: 100px;">
+                <div id="video-container" style="display: none;">
+                    <video
+                        id="my-video"
+                        class="video-js"
+                        controls
+                        preload="auto"
+                        poster="MY_VIDEO_POSTER.jpg"
+                        data-setup="{}"
+                        >
+                            <source src="static/MY_VIDEO.mp4" type="video/mp4" />
+                            <p class="vjs-no-js">
+                                To view this video please enable JavaScript, and consider upgrading to a web browser that
+                                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                            </p>
+                    </video>
+                </div>
+            </td>
 
-        <br><br>
-
-    <div id="video-container" style="display: none;">
-        <video
-            id="my-video"
-            class="video-js"
-            controls
-            preload="auto"
-            poster="MY_VIDEO_POSTER.jpg"
-            data-setup="{}"
-            >
-                <source src="static/MY_VIDEO.mp4" type="video/mp4" />
-                <p class="vjs-no-js">
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-                </p>
-        </video>
-    </div>
+            <td>
+                <div id="users-list" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left;">Current Users:</div>
+            </td>
+        </tr>
+    </table>
 {% endblock %}

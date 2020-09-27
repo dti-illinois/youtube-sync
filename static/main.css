@@ -43,9 +43,3 @@ a {
 a:hover {
     color: lightblue;
 }
-
-video {
-    text-align: center;
-    display: block;
-    margin: 0 auto;
-}

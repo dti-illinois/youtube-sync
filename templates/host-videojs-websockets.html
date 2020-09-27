@@ -23,7 +23,12 @@
                 else if (event["type"] == "user_data") {
                     var userData = event["data"];
                     document.getElementById("users-list").innerHTML = "<h2 style='margin: 0;'>Current Users:</h2>";
-                    userData.forEach(element => document.getElementById("users-list").innerHTML += ("<br> - " + element["username"]));
+                    userData.forEach(function(element) {
+                        var emblem = "";
+                        if (element["role"] == "host")
+                            emblem = " <b>(Host)</b>";
+                        document.getElementById("users-list").innerHTML += ("<br> - " + element["username"] + emblem);
+                    });
                 }
                 else if (event["type"] == "guest_data") {
 
@@ -69,7 +74,7 @@
         <p>Note: If you close this tab or navigate to a different site, all other users will be disconnected from the session.</p>
 
         <div id="form">
-            <input type="text" placeholder="Your Name" id="your_name" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
+            <input type="text" placeholder="Your Name" id="your_name" maxlength="20" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
             <button onclick="startSession();" id="btnStartSession" disable>Start Session</button>
         </div>
 
@@ -77,7 +82,7 @@
 
     <table>
         <tr>
-            <td style="padding-right: 100px;">
+            <td style="padding-right: 75px;">
                 <div id="video-container" style="display: none;">
                     <video
                         id="my-video"
@@ -97,7 +102,7 @@
             </td>
 
             <td>
-                <div id="users-list" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left;">Current Users:</div>
+                <div id="users-list" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; min-width: 300px;">Current Users:</div>
             </td>
         </tr>
     </table>

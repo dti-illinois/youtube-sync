@@ -70,7 +70,7 @@
         <h2 id="session-closed" style="display: none;">The session was closed by the host.<br><br></h2>
 
         <div id="form">
-            <input type="text" placeholder="Your Name" id="your_name" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
+            <input type="text" placeholder="Your Name" id="your_name" maxlength="20" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
             <button onclick="joinSession();" id="btnStartSession" disabled>Join Session</button>
         </div>
     </div>

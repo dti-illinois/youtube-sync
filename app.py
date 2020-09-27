@@ -80,6 +80,8 @@ def videojs_websockets_combined():
 
 @socketio.on('message')
 def handle_message(message):
+    global users
+
     print('Received message: ' + str(message))
     if message["type"] == "join" and message["role"] == "guest":
         print("Recieved join request")
@@ -94,7 +96,6 @@ def handle_message(message):
             for user in users:
                 if user["username"] == message["name"]:
                     success_joining = False
-                    print("Unique username error")
             if success_joining == False:
                 send({"type": "join_request_response", "value": False, "reason": "username_not_unique"})
             else:
@@ -111,6 +112,7 @@ def handle_message(message):
                 del users[i]
         send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "host":
+        users = []
         send({"type": "host_left"}, broadcast=True)
     elif message["type"] == "host_data":
         send({"type": "player_data", "data": message["data"]}, broadcast=True)

@@ -73,6 +73,11 @@ def videojs_host_websockets():
     return render_template("host-videojs-websockets.html")
 
 
+@app.route('/videojs-websockets')
+def videojs_websockets_combined():
+    return render_template("videojs-websockets-combined.html")
+
+
 @socketio.on('message')
 def handle_message(message):
     print('Received message: ' + str(message))

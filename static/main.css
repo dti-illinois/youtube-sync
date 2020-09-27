@@ -14,8 +14,9 @@ body {
 }
 
 .body-container {
-    display: inline-block;
-    max-width: 40%;
+    padding-top: 100px;
+    text-align: center;
+    color: white;
 }
 
 @media only screen and (max-width: 1000px) {
@@ -37,7 +38,8 @@ h1, h3 {
 }
 
 a {
-    color: white;
+    color: white !important;
+    display: block;
 }
 
 a:hover {

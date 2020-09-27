@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <script>
+        var role = 1;
+        var username, myVideo, socket, updatingPlayer;
+
+        window.onbeforeunload = function() {
+            if (role == 0)
+                socket.send({"type":"leave", "role":"host"});
+            else
+                socket.send({"type":"leave", "role":"guest", "name": username});
+        }
+
+        function session_begin() {
+            if (document.getElementById("host_radio").checked == true) {
+                role = 0;
+            }
+
+            username = document.getElementById("username_input").value;
+
+            socket = io.connect('localhost:5000');
+
+            document.getElementById("form").style.display = "none";
+            document.getElementById("video-container").style.display = "initial";
+
+            // If the user is a host
+            if (role == 0) {
+                StartSession();
+            }
+            // If the user is a guest
+            else {
+                JoinSession();
+            }
+        }
+
+        function StartSession() {
+            document.getElementById("users-list-host").style.display = "inline-block";
+            document.getElementById("host-notice").style.display = "initial";
+
+            socket.send({"type":"join","role":"host","name":username});
+
+            myVideo.on("play", SetData);
+            myVideo.on("pause", SetData);
+            myVideo.on("seeked", SetData);
+
+            socket.addEventListener('message', function (event) {
+                if (event["type"] == "guest_joined") {
+                    SetData();
+                }
+                else if (event["type"] == "user_data") {
+                    var userData = event["data"];
+                    document.getElementById("users-list-host").innerHTML = "<h2 style='margin: 0;'>Current Users:</h2>";
+                    userData.forEach(function(element) {
+                        var emblem = "";
+                        if (element["role"] == "host")
+                            emblem = " <b>(Host)</b>";
+                        document.getElementById("users-list-host").innerHTML += ("<br> - " + element["username"] + emblem);
+                    });
+                }
+                else if (event["type"] == "guest_data") {
+
+                    if (event["action"] == "play")
+                        myVideo.play();
+                    else if (event["action"] == "pause")
+                        myVideo.pause();
+                    else if (event["action"] == "seek")
+                        myVideo.currentTime(event["timestamp"]);
+                }
+            });
+
+            SetData();
+            var intervalID = window.setInterval(SetData, 10000);
+        }
+
+        function JoinSession() {
+            document.getElementById("users-list-guest").style.display = "inline-block";
+            socket.send({"type":"join","role":"guest","name":username});
+
+            myVideo.on("play", function () {
+                if (updatingPlayer == false)
+                    socket.send({"type":"guest_data", "action": "play", "timestamp": 0})
+                updatingPlayer = false;
+            });
+            myVideo.on("pause", function () {
+                if (updatingPlayer == false)
+                    socket.send({"type":"guest_data", "action": "pause", "timestamp": 0})
+                updatingPlayer = false;
+            });
+            myVideo.on("seeked", function () {
+                if (updatingPlayer == false)
+                    socket.send({"type":"guest_data", "action": "seek", "timestamp": myVideo.currentTime()})
+                updatingPlayer = false;
+            });
+
+            socket.addEventListener('message', function (event) {
+                if (event["type"] == "host_left") {
+                    document.getElementById("form").style.display = "initial";
+                    document.getElementById("video-container").style.display = "none";
+                    document.getElementById("session-closed").style.display = "initial";
+                }
+                else if (event["type"] == "user_data") {
+                    var userData = event["data"];
+                    document.getElementById("users-list-guest").innerHTML = "<h2 style='margin: 0;'>Current Users:</h2>";
+                    userData.forEach(function(element) {
+                        var emblem = "";
+                        if (element["role"] == "host")
+                            emblem = " <b>(Host)</b>";
+                        document.getElementById("users-list-guest").innerHTML += ("<br> - " + element["username"] + emblem);
+                    });
+                }
+                else if (event["type"] == "player_data") {
+                    UpdatePlayer(JSON.parse(event["data"]));
+                }
+            });
+        }
+
+        function initVideo() {
+            myVideo = videojs('my-video');
+        }
+
+        function SetData() {
+            var dataToSet = JSON.stringify({
+                PlayerTimestamp: myVideo.currentTime(),
+                Paused: myVideo.paused()
+            });
+
+            socket.send({"type":"host_data","action":"set","data":dataToSet});
+        }
+
+        function UpdatePlayer(PlayerData) {
+            updatingPlayer = true;
+            myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+
+            if (PlayerData["Paused"] == true) {
+                myVideo.pause();
+            } else {
+                myVideo.play();
+            }
+        }
+    </script>
+
+    <div class="body-container">
+        <h1>Video.js WebSockets Freemode</h1>
+        <a href="/">Return to Homepage</a>
+
+        <br>
+
+        <h2 id="session-closed" style="display: none;">The session was closed by the host.<br><br></h2>
+
+        <div id="form">
+            <input type="radio" id="guest_radio" name="host_guest" value="guest" onchange="document.getElementById('btnStartSession').innerHTML = 'Join Session';" checked />
+            <label for="guest_radio">Join an Existing Session</label><br>
+            <input type="radio" id="host_radio" name="host_guest" value="host" onchange="document.getElementById('btnStartSession').innerHTML = 'Create Session';" />
+            <label for="host_radio">Host a New Session</label><br><br>
+            <input type="text" placeholder="Your Name" id="username_input" maxlength="20" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
+            <br><br>
+            <button class="btn btn-success" onclick="session_begin()" id="btnStartSession" disabled>Join Session</button>
+        </div>
+
+        <p id="host-notice" style="display: none;">Warning: If you close this tab or navigate to a different site, all other users will be disconnected from the session.<br><br></p>
+    </div>
+
+    <table>
+        <tr>
+            <td style="padding-right: 75px;">
+                <div id="video-container" style="display: none;">
+                    <video
+                        id="my-video"
+                        class="video-js"
+                        controls
+                        preload="auto"
+                        poster="MY_VIDEO_POSTER.jpg"
+                        data-setup="{}"
+                        >
+                            <source src="static/MY_VIDEO.mp4" type="video/mp4" />
+                            <p class="vjs-no-js">
+                                To view this video please enable JavaScript, and consider upgrading to a web browser that
+                                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                            </p>
+                    </video>
+                </div>
+            </td>
+
+            <td>
+                <div id="users-list-host" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; min-width: 300px;">Current Users:</div>
+                <div id="users-list-guest" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; min-width: 300px;">Current Users:</div>
+            </td>
+        </tr>
+    </table>
+
+{% endblock %}

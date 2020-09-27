@@ -39,8 +39,9 @@
 
         function StartSession() {
             document.getElementById("video-container").style.display = "initial";
-            document.getElementById("users-list-host").style.display = "inline-block";
+            document.getElementById("users-list").style.display = "inline-block";
             document.getElementById("host-notice").style.display = "initial";
+            document.getElementById("host-user-control-buttons").style.display = "initial";
 
             socket.send({"type":"join","role":"host","name":username});
 
@@ -103,20 +104,20 @@
                     document.getElementById("form").style.display = "initial";
                     document.getElementById("video-container").style.display = "none";
                     document.getElementById("session-closed").style.display = "initial";
-                    document.getElementById("users-list-guest").style.display = "none";
+                    document.getElementById("users-list").style.display = "none";
                     socket.close();
                 }
                 else if (event["type"] == "user_data") {
                     var userData = event["data"];
-                    document.getElementById("users-list-guest").innerHTML = "<h2 style='margin: 0;'>Current Users:</h2>";
+                    document.getElementById("users-list-host-child").innerHTML = "";
                     userData.forEach(function(element) {
-                        var prefix = "";
+                        var host_style = "";
                         var suffix = "";
                         if (element["role"] == "host") {
-                            prefix = "<b>"
-                            suffix = " (Host)</b>";
+                            host_style = " style='font-weight: bold;'";
+                            suffix = " (Host)";
                         }
-                        document.getElementById("users-list-guest").innerHTML += ("<br>" + prefix + " - " + element["username"] + suffix);
+                        document.getElementById("users-list-host-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + element["username"] + "'> - " + element["username"] + suffix + "</option>");
                     });
                 }
                 else if (event["type"] == "player_data") {
@@ -148,7 +149,7 @@
                     }
                     else {
                         document.getElementById("video-container").style.display = "initial";
-                        document.getElementById("users-list-guest").style.display = "inline-block";
+                        document.getElementById("users-list").style.display = "inline-block";
                         document.getElementById("error-display").style.display = "none";
                     }
                 }
@@ -231,16 +232,16 @@
 
             <br><br>
 
-            <div id="users-list-host" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; min-width: 300px;">
+            <div id="users-list" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; min-width: 300px;">
                 <b style='margin: 0;'>Current Users:</b>
                 <select id="users-list-host-child" multiple></select>
 
                 <br><br>
-                <button type="button" class="btn btn-success">Make Selected User Host</button>
-                <button type="button" class="btn btn-danger">Kick Selected User from Session</button>
+                <div id="host-user-control-buttons" style="display: none;">
+                    <button type="button" class="btn btn-success">Make Selected User Host</button>
+                    <button type="button" class="btn btn-danger">Kick Selected User from Session</button>
+                </div>
             </div>
-
-            <div id="users-list-guest" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; min-width: 300px;">Current Users:</div>
         </div>
     </div>
 

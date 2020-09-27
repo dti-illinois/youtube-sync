@@ -9,9 +9,6 @@
         }
 
         function joinSession() {
-            // TODO: check to make sure name is set before letting the user click the button
-            // TODO: make sure each user name is unique
-
             userName = document.getElementById("your_name").value;
 
             document.getElementById("form").style.display = "none";
@@ -27,11 +24,7 @@
                     document.getElementById("session-closed").style.display = "initial";
                 }
                 else if (event["type"] == "player_data") {
-                    console.log("Recieved data from host:" + event["data"]);
                     UpdatePlayer(JSON.parse(event["data"]));
-                }
-                else {
-                    console.log('Message from server: ', event);
                 }
             });
 
@@ -77,8 +70,8 @@
         <h2 id="session-closed" style="display: none;">The session was closed by the host.<br><br></h2>
 
         <div id="form">
-            <input type="text" placeholder="Your Name" id="your_name" />
-            <button onclick="joinSession();">Join Session</button>
+            <input type="text" placeholder="Your Name" id="your_name" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
+            <button onclick="joinSession();" id="btnStartSession" disabled>Join Session</button>
         </div>
     </div>
 

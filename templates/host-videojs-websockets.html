@@ -21,8 +21,6 @@
         };
 
         function startSession() {
-            // TODO: check to make sure name is set before letting the user click the button
-
             userName = document.getElementById("your_name").value;
 
             users.push(userName);
@@ -52,10 +50,6 @@
                         myVideo.pause();
                     else if (event["action"] == "seek")
                         myVideo.currentTime(event["timestamp"]);
-                }
-                else {
-                    // TODO: Delete this when done working with websockets testing
-                    console.log('Message from server: ', event);
                 }
             });
 
@@ -97,8 +91,8 @@
         <p>Note: If you close this tab or navigate to a different site, all other users will be disconnected from the session.</p>
 
         <div id="form">
-            <input type="text" placeholder="Your Name" id="your_name" />
-            <button onclick="startSession();">Start Session</button>
+            <input type="text" placeholder="Your Name" id="your_name" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
+            <button onclick="startSession();" id="btnStartSession" disable>Start Session</button>
         </div>
 
         <br><br>

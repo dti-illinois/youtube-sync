@@ -6,6 +6,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins='http://127.0.0.1:5000')
 
+users = []
 
 @app.route('/')
 def index():
@@ -77,8 +78,16 @@ def handle_message(message):
     print('Received message: ' + str(message))
     if message["type"] == "join" and message["role"] == "guest":
         send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
+        users.append({"role": "guest", "username": message["name"]})
+        send({"type": "user_data", "data": users}, broadcast=True)
+    elif message["type"] == "join" and message["role"] == "host":
+        users.append({"role": "host", "username": message["name"]})
+        send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "guest":
-        send({"type": "guest_left", "name": message["name"]}, broadcast=True)
+        for i in range(len(users)):
+            if users[i]["username"] == message["name"]:
+                del users[i]
+        send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "host":
         send({"type": "host_left"}, broadcast=True)
     elif message["type"] == "host_data":

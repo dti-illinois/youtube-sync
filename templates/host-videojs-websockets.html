@@ -3,44 +3,27 @@
 {% block content %}
     <script>
         var myVideo, socket, userName;
-        var users = [];
 
         window.onbeforeunload = function() {
             socket.send({"type":"leave", "role":"host"});
         }
 
-        Array.prototype.remove = function() {
-            var what, a = arguments, L = a.length, ax;
-            while (L && this.length) {
-                what = a[--L];
-                while ((ax = this.indexOf(what)) !== -1) {
-                    this.splice(ax, 1);
-                }
-            }
-            return this;
-        };
-
         function startSession() {
+            socket = io.connect('localhost:5000');
             userName = document.getElementById("your_name").value;
-
-            users.push(userName);
-            UpdateUsers();
 
             document.getElementById("form").style.display = "none";
             document.getElementById("video-container").style.display = "initial";
             document.getElementById("users-list").style.display = "inline-block";
 
-            socket = io.connect('localhost:5000');
-
             socket.addEventListener('message', function (event) {
                 if (event["type"] == "guest_joined") {
                     SetData();
-                    users.push(event["name"]);
-                    UpdateUsers();
                 }
-                else if (event["type"] == "guest_left") {
-                    users.remove(event["name"]);
-                    UpdateUsers();
+                else if (event["type"] == "user_data") {
+                    var userData = event["data"];
+                    document.getElementById("users-list").innerHTML = "<h2 style='margin: 0;'>Current Users:</h2>";
+                    userData.forEach(element => document.getElementById("users-list").innerHTML += ("<br> - " + element["username"]));
                 }
                 else if (event["type"] == "guest_data") {
 
@@ -61,11 +44,6 @@
 
             SetData();
             var intervalID = window.setInterval(SetData, 10000);
-        }
-
-        function UpdateUsers() {
-            document.getElementById("users-list").innerHTML = "<h2 style='margin: 0;'>Current Users:</h2>";
-            users.forEach(element => document.getElementById("users-list").innerHTML += ("<br> - " + element));
         }
 
         function initVideo() {

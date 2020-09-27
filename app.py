@@ -62,9 +62,29 @@ def websockets_test():
     return render_template("websockets-test.html")
 
 
+@app.route('/videojs-guest-websockets')
+def videojs_guest_websockets():
+    return render_template("guest-videojs-websockets.html")
+
+
+@app.route('/videojs-host-websockets')
+def videojs_host_websockets():
+    return render_template("host-videojs-websockets.html")
+
+
 @socketio.on('message')
 def handle_message(message):
     print('Received message: ' + str(message))
+    if message["type"] == "join" and message["role"] == "guest":
+        send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
+    elif message["type"] == "leave" and message["role"] == "guest":
+        send({"type": "guest_left", "name": message["name"]}, broadcast=True)
+    elif message["type"] == "leave" and message["role"] == "host":
+        send({"type": "host_left"}, broadcast=True)
+    elif message["type"] == "host_data":
+        send({"type": "player_data", "data": message["data"]}, broadcast=True)
+    elif message["type"] == "guest_data":
+        send({"type": "guest_data", "action": message["action"], "timestamp": message["timestamp"]}, broadcast=True)
 
 
 @socketio.on('connect')

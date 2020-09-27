@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <script>
+        var myVideo, socket, userName;
+        var users = [];
+
+        window.onbeforeunload = function() {
+            socket.send({"type":"leave", "role":"host"});
+        }
+
+        Array.prototype.remove = function() {
+            var what, a = arguments, L = a.length, ax;
+            while (L && this.length) {
+                what = a[--L];
+                while ((ax = this.indexOf(what)) !== -1) {
+                    this.splice(ax, 1);
+                }
+            }
+            return this;
+        };
+
+        function startSession() {
+            // TODO: check to make sure name is set before letting the user click the button
+
+            userName = document.getElementById("your_name").value;
+
+            users.push(userName);
+            UpdateUsers();
+
+            document.getElementById("form").style.display = "none";
+            document.getElementById("video-container").style.display = "initial";
+            document.getElementById("users-list").style.display = "initial";
+
+            socket = io.connect('localhost:5000');
+
+            socket.addEventListener('message', function (event) {
+                if (event["type"] == "guest_joined") {
+                    SetData();
+                    users.push(event["name"]);
+                    UpdateUsers();
+                }
+                else if (event["type"] == "guest_left") {
+                    users.remove(event["name"]);
+                    UpdateUsers();
+                }
+                else if (event["type"] == "guest_data") {
+
+                    if (event["action"] == "play")
+                        myVideo.play();
+                    else if (event["action"] == "pause")
+                        myVideo.pause();
+                    else if (event["action"] == "seek")
+                        myVideo.currentTime(event["timestamp"]);
+                }
+                else {
+                    // TODO: Delete this when done working with websockets testing
+                    console.log('Message from server: ', event);
+                }
+            });
+
+            myVideo.on("play", SetData);
+            myVideo.on("pause", SetData);
+            myVideo.on("seeked", SetData);
+
+            socket.send({"type":"join","role":"host","name":userName});
+
+            SetData();
+            var intervalID = window.setInterval(SetData, 10000);
+        }
+
+        function UpdateUsers() {
+            document.getElementById("users-list").innerHTML = "Current Users:";
+            users.forEach(element => document.getElementById("users-list").innerHTML += "\n" + element);
+        }
+
+        function initVideo() {
+            myVideo = videojs('my-video');
+        }
+
+        function SetData() {
+            var dataToSet = JSON.stringify({
+                PlayerTimestamp: myVideo.currentTime(),
+                Paused: myVideo.paused()
+            });
+
+            socket.send({"type":"host_data","action":"set","data":dataToSet});
+        }
+    </script>
+
+    <div class="body-container">
+        <h1>Video.js WebSockets Freemode Host</h1>
+        <a href="/">Return to Homepage</a>
+
+        <br><br><br>
+
+        <p>Note: If you close this tab or navigate to a different site, all other users will be disconnected from the session.</p>
+
+        <div id="form">
+            <input type="text" placeholder="Your Name" id="your_name" />
+            <button onclick="startSession();">Start Session</button>
+        </div>
+
+        <br><br>
+
+        <textarea id="users-list" rows="10" cols="50" style="display: none;">Current Users:</textarea>
+
+        <br><br>
+
+    <div id="video-container" style="display: none;">
+        <video
+            id="my-video"
+            class="video-js"
+            controls
+            preload="auto"
+            poster="MY_VIDEO_POSTER.jpg"
+            data-setup="{}"
+            >
+                <source src="static/MY_VIDEO.mp4" type="video/mp4" />
+                <p class="vjs-no-js">
+                    To view this video please enable JavaScript, and consider upgrading to a web browser that
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                </p>
+        </video>
+    </div>
+{% endblock %}

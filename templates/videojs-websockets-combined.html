@@ -103,7 +103,9 @@
                 if (event["type"] == "host_left") {
                     document.getElementById("form").style.display = "initial";
                     document.getElementById("video-container").style.display = "none";
-                    document.getElementById("session-closed").style.display = "initial";
+                    myVideo.pause();
+                    document.getElementById("session-ended").style.display = "initial";
+                    document.getElementById("session-ended").innerHTML = "The session was closed by the host.<br><br>";
                     document.getElementById("users-list").style.display = "none";
                     socket.close();
                 }
@@ -122,6 +124,18 @@
                 }
                 else if (event["type"] == "player_data") {
                     UpdatePlayer(JSON.parse(event["data"]));
+                }
+                else if (event["type"] == "kick_user") {
+                    if (username == event["user"]) {
+                        document.getElementById("form").style.display = "initial";
+                        document.getElementById("video-container").style.display = "none";
+                        myVideo.pause();
+                        document.getElementById("session-ended").style.display = "initial";
+                        document.getElementById("session-ended").innerHTML = "You were kicked from the session.<br><br>";
+                        document.getElementById("users-list").style.display = "none";
+                        socket.send({"type":"leave", "role":"guest", "name": username});
+                        socket.close();
+                    }
                 }
                 else if (event["type"] == "join_request_response") {
                     document.getElementById("joining-session").style.display = "none";
@@ -194,7 +208,7 @@
 
         <br>
 
-        <h2 id="session-closed" style="display: none;">The session was closed by the host.<br><br></h2>
+        <h2 id="session-ended" style="display: none;"></h2>
 
         <div id="form">
             <input type="radio" id="guest_radio" name="host_guest" value="guest" onchange="document.getElementById('btnStartSession').innerHTML = 'Join Session';" checked />
@@ -239,7 +253,7 @@
                 <br><br>
                 <div id="host-user-control-buttons" style="display: none;">
                     <button type="button" class="btn btn-success">Make Selected User Host</button>
-                    <button type="button" class="btn btn-danger">Kick Selected User from Session</button>
+                    <button type="button" class="btn btn-danger" onclick="socket.send({'type':'kick_user','user':document.getElementById('users-list-host-child').options[document.getElementById('users-list-host-child').selectedIndex].value});">Kick Selected User from Session</button>
                 </div>
             </div>
         </div>

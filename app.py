@@ -118,6 +118,8 @@ def handle_message(message):
         send({"type": "player_data", "data": message["data"]}, broadcast=True)
     elif message["type"] == "guest_data":
         send({"type": "guest_data", "action": message["action"], "timestamp": message["timestamp"]}, broadcast=True)
+    elif message["type"] == "kick_user":
+        send(message, broadcast=True)
 
 
 @socketio.on('connect')

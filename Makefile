@@ -18,3 +18,5 @@ up: build
 down:
 	docker-compose down
 
+clean: 
+	docker rmi -f $(docker images | grep video-sync-service | awk '{print $3}' 2>/dev/null || true

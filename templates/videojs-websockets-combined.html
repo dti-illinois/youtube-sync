@@ -40,6 +40,7 @@
         function StartSession() {
             document.getElementById("video-container").style.display = "initial";
             document.getElementById("users-list").style.display = "inline-block";
+            document.getElementById("chat-div").style.display = "inline-block";
             document.getElementById("host-notice").style.display = "initial";
             document.getElementById("host-user-control-buttons").style.display = "initial";
 
@@ -55,7 +56,7 @@
                 }
                 else if (event["type"] == "user_data") {
                     var userData = event["data"];
-                    document.getElementById("users-list-host-child").innerHTML = "";
+                    document.getElementById("users-list-child").innerHTML = "";
                     userData.forEach(function(element) {
                         var host_style = "";
                         var suffix = "";
@@ -63,7 +64,7 @@
                             host_style = " style='font-weight: bold;'";
                             suffix = " (Host)";
                         }
-                        document.getElementById("users-list-host-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + element["username"] + "'> - " + element["username"] + suffix + "</option>");
+                        document.getElementById("users-list-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + element["username"] + "'> - " + element["username"] + suffix + "</option>");
                     });
                 }
                 else if (event["type"] == "guest_data") {
@@ -74,6 +75,9 @@
                         myVideo.pause();
                     else if (event["action"] == "seek")
                         myVideo.currentTime(event["timestamp"]);
+                }
+                else if (event["type"] == "chat") {
+                    UpdateChat(event);
                 }
             });
 
@@ -105,13 +109,14 @@
                     document.getElementById("video-container").style.display = "none";
                     myVideo.pause();
                     document.getElementById("session-ended").style.display = "initial";
+                    document.getElementById("chat-div").style.display = "none";
                     document.getElementById("session-ended").innerHTML = "The session was closed by the host.<br><br>";
                     document.getElementById("users-list").style.display = "none";
                     socket.close();
                 }
                 else if (event["type"] == "user_data") {
                     var userData = event["data"];
-                    document.getElementById("users-list-host-child").innerHTML = "";
+                    document.getElementById("users-list-child").innerHTML = "";
                     userData.forEach(function(element) {
                         var host_style = "";
                         var suffix = "";
@@ -119,7 +124,7 @@
                             host_style = " style='font-weight: bold;'";
                             suffix = " (Host)";
                         }
-                        document.getElementById("users-list-host-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + element["username"] + "'> - " + element["username"] + suffix + "</option>");
+                        document.getElementById("users-list-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + element["username"] + "'> - " + element["username"] + suffix + "</option>");
                     });
                 }
                 else if (event["type"] == "player_data") {
@@ -133,9 +138,16 @@
                         document.getElementById("session-ended").style.display = "initial";
                         document.getElementById("session-ended").innerHTML = "You were kicked from the session.<br><br>";
                         document.getElementById("users-list").style.display = "none";
+                        document.getElementById("chat-div").style.display = "none";
                         socket.send({"type":"leave", "role":"guest", "name": username});
                         socket.close();
                     }
+                }
+                else if (event["type"] == "chat") {
+                    UpdateChat(event);
+                }
+                else if (event["type"] == "chat_history") {
+                    event["data"].forEach(message => UpdateChat(message));
                 }
                 else if (event["type"] == "join_request_response") {
                     document.getElementById("joining-session").style.display = "none";
@@ -164,10 +176,20 @@
                     else {
                         document.getElementById("video-container").style.display = "initial";
                         document.getElementById("users-list").style.display = "inline-block";
+                        document.getElementById("chat-div").style.display = "inline-block";
                         document.getElementById("error-display").style.display = "none";
                     }
                 }
             });
+        }
+
+        function UpdateChat(event) {
+            var emblem = "";
+            if (event["role"] == 0) {
+                emblem = " style='font-weight: bold;'"
+            }
+            document.getElementById("chat-box").innerHTML += ("<br><option" + emblem + " class='username-object' value='" + event["message"] + "'>" + event["message"] + "</option>");
+            document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
         }
 
         function initVideo() {
@@ -176,6 +198,12 @@
             document.getElementById("username_input").onkeypress = function(e) {
                 if (e.which == 60 || e.which == 62) {
                     e.preventDefault();
+                }
+            }
+
+            document.getElementById("chat-type").onkeypress = function(e) {
+                if (e.which == 13) {
+                    sendChatMessage();
                 }
             }
         }
@@ -187,6 +215,11 @@
             });
 
             socket.send({"type":"host_data","action":"set","data":dataToSet});
+        }
+
+        function sendChatMessage() {
+            socket.send({'type':'chat', 'message': username + ': ' + document.getElementById('chat-type').value, 'role': role});
+            document.getElementById('chat-type').value = '';
         }
 
         function UpdatePlayer(PlayerData) {
@@ -245,18 +278,34 @@
             </div>
 
             <br><br>
-
-            <div id="users-list" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; min-width: 300px;">
-                <b style='margin: 0;'>Current Users:</b>
-                <select id="users-list-host-child" multiple></select>
-
-                <br><br>
-                <div id="host-user-control-buttons" style="display: none;">
-                    <button type="button" class="btn btn-success">Make Selected User Host</button>
-                    <button type="button" class="btn btn-danger" onclick="socket.send({'type':'kick_user','user':document.getElementById('users-list-host-child').options[document.getElementById('users-list-host-child').selectedIndex].value});">Kick Selected User from Session</button>
-                </div>
-            </div>
         </div>
+    </div>
+
+    <div style="display: block; text-align: center;">
+        <table style="display: inline-block; max-width: 90vw;">
+            <tr>
+                <td>
+                    <div id="users-list" style="display: none; height: 300px; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; width: 550px;">
+                        <b style='margin: 0;'>Current Users:</b>
+                        <select id="users-list-child" multiple></select>
+
+                        <br><br>
+                        <div id="host-user-control-buttons" style="display: none;">
+                            <button type="button" class="btn btn-success">Make Selected User Host</button>
+                            <button type="button" class="btn btn-danger" onclick="socket.send({'type':'kick_user','user':document.getElementById('users-list-child').options[document.getElementById('users-list-child').selectedIndex].value});">Kick Selected User from Session</button>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div id="chat-div" style="display: none; height: 300px; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left; width: 550px;">
+                        <b style='margin: 0;'>Chat:</b>
+                        <select id="chat-box" multiple></select><br>
+                        <input type="text" name="chat-type" id="chat-type" style="width: 82%; margin-right: 8px;" placeholder="Type a message" /><button onclick="sendChatMessage();" class="btn btn-primary">Send</button>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 
 {% endblock %}

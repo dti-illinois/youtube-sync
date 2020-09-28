@@ -7,6 +7,7 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins='http://127.0.0.1:5000')
 
 users = []
+chat_history = []
 
 @app.route('/')
 def index():
@@ -81,6 +82,7 @@ def videojs_websockets_combined():
 @socketio.on('message')
 def handle_message(message):
     global users
+    global chat_history
 
     print('Received message: ' + str(message))
     if message["type"] == "join" and message["role"] == "guest":
@@ -100,6 +102,7 @@ def handle_message(message):
                 send({"type": "join_request_response", "value": False, "reason": "username_not_unique"})
             else:
                 send({"type": "join_request_response", "value": True})
+                send({"type": "chat_history", "data": chat_history})
                 send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
                 users.append({"role": "guest", "username": message["name"]})
                 send({"type": "user_data", "data": users}, broadcast=True)
@@ -113,12 +116,16 @@ def handle_message(message):
         send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "host":
         users = []
+        chat_history = []
         send({"type": "host_left"}, broadcast=True)
     elif message["type"] == "host_data":
         send({"type": "player_data", "data": message["data"]}, broadcast=True)
     elif message["type"] == "guest_data":
         send({"type": "guest_data", "action": message["action"], "timestamp": message["timestamp"]}, broadcast=True)
     elif message["type"] == "kick_user":
+        send(message, broadcast=True)
+    elif message["type"] == "chat":
+        chat_history.append(message)
         send(message, broadcast=True)
 
 

@@ -46,11 +46,17 @@ a:hover {
     color: lightblue;
 }
 
-#users-list-host-child {
+#users-list-child {
     overflow-y: hidden;
     overflow: hidden;
     padding: 10px;
     width: 100%;
+}
+
+#chat-box {
+    padding: 10px;
+    width: 100%;
+    height: 75%;
 }
 
 .username-object {

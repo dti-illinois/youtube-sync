@@ -47,8 +47,6 @@ a:hover {
 }
 
 #users-list-child {
-    overflow-y: hidden;
-    overflow: hidden;
     padding: 10px;
     width: 100%;
 }

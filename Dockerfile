@@ -9,4 +9,4 @@ COPY . .
 RUN pip install -r /app/requirements.txt
 
 RUN pwd
-CMD ["gunicorn", "run:subdirectory_app", "--config", "/app/gunicorn.config.py"]
+CMD ["gunicorn", "app:app", "--config", "/app/gunicorn.config.py"]

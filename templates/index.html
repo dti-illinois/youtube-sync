@@ -1,38 +1,48 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="body-container leftalign">
-        <h1>Welcome to Youtube-Sync</h1>
+    <div class="body-parent" style="display: block; text-align: center;">
+        <div class="body-container leftalign" style="display: inline-block; text-align: left; max-width: 50vw;">
+            <h1>Welcome to Youtube-Sync</h1>
 
-        <h3>Click one of the below links to test the project.</h3>
+            <h3>Click one of the below links to test the project.</h3>
 
-        <b>Video.js Freemode Tests</b>
-        <p>The latest version of this project. Uses the Video.js player. Supports up to 4 users, and any user can control the video.</p>
-        <ul>
-            <li><a href="videojs-freemode">Join/Host a Session</a></li>
-            <li><a href="websockets-test">WebSockets Test Page</a></li>
-        </ul>
+            <b>Video.js Freemode Tests (Fast WebSockets Method)</b>
+            <p>The latest version of this project. Uses the Video.js player. Any user can control the video, but one user is assigned as the host. Should eventually be able to support a theoretically infinite amount of users.</p>
+            <ul>
+                <li><a href="videojs-websockets">Join or Host a Session</a></li>
+                <li><a href="websockets-test">WebSockets Test Page</a></li>
+                <li><a href="videojs-host-websockets">Host a Session (Old Page)</a></li>
+                <li><a href="videojs-guest-websockets">Join a Session (Old Page)</a></li>
+            </ul>
 
-        <b>Video.js Guest/Host Tests</b>
-        <p>The previous version of this project. Uses the Video.js player. Supports up to 4 users, but only 1 user can act as the "host" and control the video.</p>
-        <ul>
-            <li><a href="video-test">Video Player Test Page</a></li>
-            <li><a href="guest-videojs">Join a Session</a></li>
-            <li><a href="host-videojs">Host a Session</a></li>
-        </ul>
+            <b>Video.js Freemode Tests (Slow Pinging Method)</b>
+            <p>Uses the Video.js player. Supports up to 4 users, and any user can control the video.</p>
+            <ul>
+                <li><a href="videojs-freemode">Join/Host a Session</a></li>
+            </ul>
 
-        <b>YouTube Guest/Host Tests</b>
-        <p>The original version of this project. Uses the YouTube embed player. Supports up to 4 users, but only 1 user can act as the "host" and control the video. The YouTube player is no longer used because it would not be possible to implement Freemode technology due to limited control using the API.</p>
-        <ul>
-            <li><a href="guest-youtube">Join a Session</a></li>
-            <li><a href="host-youtube">Host a Session</a></li>
-        </ul>
+            <b>Video.js Guest/Host Tests (Slow Pinging Method)</b>
+            <p>Uses the Video.js player. Supports up to 4 users, but only 1 user can act as the "host" and control the video.</p>
+            <ul>
+                <li><a href="video-test">Video Player Test Page</a></li>
+                <li><a href="guest-videojs">Join a Session</a></li>
+                <li><a href="host-videojs">Host a Session</a></li>
+            </ul>
 
-        <b>About the Project</b>
-        <p>
-            Youtube-Sync is a project that aims to sync up video streams to allow students at the University of Illinois to view prerecorded lectures together in real time. This project uses the Video.js API.
-            <br><br>As of now, the video player can support up to 4 people watching at the same time. Any user can pause/play the video or skip ahead/behind and these changes will be synchronized between all users.
-            <br><br>Future features include websockets functionality to reduce server load and a built-in chat.
-        </p>
+            <b>YouTube Guest/Host Tests</b>
+            <p>The original version of this project. Uses the YouTube embed player. Supports up to 4 users, but only 1 user can act as the "host" and control the video. The YouTube player is no longer used because it would not be possible to implement Freemode technology due to limited control using the API.</p>
+            <ul>
+                <li><a href="guest-youtube">Join a Session</a></li>
+                <li><a href="host-youtube">Host a Session</a></li>
+            </ul>
+
+            <b>About the Project</b>
+            <p>
+                Youtube-Sync is a project that aims to sync up video streams to allow students at the University of Illinois to view prerecorded lectures together in real time. This project uses the Video.js API.
+                <br><br>As of now, the video player can support up to 4 people watching at the same time. Any user can pause/play the video or skip ahead/behind and these changes will be synchronized between all users.
+                <br><br>Future features include websockets functionality to reduce server load and a built-in chat.
+            </p>
+        </div>
     </div>
 {% endblock %}

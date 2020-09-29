@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <script>
+        var myVideo, socket, userName, updatingPlayer;
+        
+        window.onbeforeunload = function() {
+            socket.send({"type":"leave", "role":"guest", "name": userName});
+        }
+
+        function joinSession() {
+            userName = document.getElementById("your_name").value;
+
+            document.getElementById("form").style.display = "none";
+            document.getElementById("video-container").style.display = "initial";
+
+            socket = io.connect('localhost:5000');
+            socket.send({"type":"join","role":"guest","name":userName});
+
+            socket.addEventListener('message', function (event) {
+                if (event["type"] == "host_left") {
+                    document.getElementById("form").style.display = "initial";
+                    document.getElementById("video-container").style.display = "none";
+                    document.getElementById("session-closed").style.display = "initial";
+                }
+                else if (event["type"] == "player_data") {
+                    UpdatePlayer(JSON.parse(event["data"]));
+                }
+            });
+
+            myVideo.on("play", function () {
+                if (updatingPlayer == false)
+                    socket.send({"type":"guest_data", "action": "play", "timestamp": 0})
+                updatingPlayer = false;
+            });
+            myVideo.on("pause", function () {
+                if (updatingPlayer == false)
+                    socket.send({"type":"guest_data", "action": "pause", "timestamp": 0})
+                updatingPlayer = false;
+            });
+            myVideo.on("seeked", function () {
+                if (updatingPlayer == false)
+                    socket.send({"type":"guest_data", "action": "seek", "timestamp": myVideo.currentTime()})
+                updatingPlayer = false;
+            });
+        }
+
+        function UpdatePlayer(PlayerData) {
+            updatingPlayer = true;
+            myVideo.currentTime(PlayerData["PlayerTimestamp"]);
+
+            if (PlayerData["Paused"] == true) {
+                myVideo.pause();
+            } else {
+                myVideo.play();
+            }
+        }
+
+        function initVideo() {
+            myVideo = videojs('my-video');
+        }
+    </script>
+
+    <div class="body-container">
+        <h1>Video.js WebSockets Freemode Guest</h1>
+        <a href="/">Return to Homepage</a>
+
+        <br><br><br>
+
+        <h2 id="session-closed" style="display: none;">The session was closed by the host.<br><br></h2>
+
+        <div id="form">
+            <input type="text" placeholder="Your Name" id="your_name" maxlength="20" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
+            <button onclick="joinSession();" id="btnStartSession" disabled>Join Session</button>
+        </div>
+    </div>
+
+    <div id="video-container" style="display: none;">
+        <video
+            id="my-video"
+            class="video-js"
+            controls
+            preload="auto"
+            poster="MY_VIDEO_POSTER.jpg"
+            data-setup="{}"
+            >
+                <source src="static/MY_VIDEO.mp4" type="video/mp4" />
+                <p class="vjs-no-js">
+                    To view this video please enable JavaScript, and consider upgrading to a web browser that
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                </p>
+        </video>
+    </div>
+{% endblock %}

@@ -11,14 +11,19 @@
 
             <br><br>
 
-            <p>
-                For video players to synchronize, each session must have a single host and one or more guest users. For synchronization purposes, everyone will sync with the host,
-                but any user can pause, resume, or skip throughout the video playback and these actions will affect everyone. The host also has the power to kick out users.
-            </p>
-
             <h2 id="session-ended" style="display: none;"></h2>
 
             <div id="form">
+                <p style="text-align: left;">
+                    <b>Instructions:</b><br>
+                    - For video players to synchronize, each session must have a single host and one or more guest users. For synchronization purposes, everyone will sync with the host,
+                    but any user can pause, resume, or skip throughout the video playback and these actions will affect everyone. The host also has the power to kick out users.
+                    <br>
+                    - To use the player, have one user select the "Host a New Session" option and then type in a name and click "Create Session". Then, have the other users select the "Join an Existing Session" option, type in a name, and click "Join Session". Anyone can pause, play, or skip throughout the video playback.
+                </p>
+
+                <br>
+
                 <input type="radio" id="guest_radio" name="host_guest" value="guest" onchange="document.getElementById('btnStartSession').innerHTML = 'Join Session';" checked />
                 <label for="guest_radio">Join an Existing Session</label><br>
                 <input type="radio" id="host_radio" name="host_guest" value="host" onchange="document.getElementById('btnStartSession').innerHTML = 'Create Session';" />

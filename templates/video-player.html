@@ -6,16 +6,19 @@
 
     <div class="body-parent">
         <div class="body-container">
-            <h1>Video.js WebSockets Freemode</h1>
+            <h1>Video Player</h1>
             <a href="/">Return to Homepage</a>
 
             <br><br>
 
+            <p>
+                For video players to synchronize, each session must have a single host and one or more guest users. For synchronization purposes, everyone will sync with the host,
+                but any user can pause, resume, or skip throughout the video playback and these actions will affect everyone. The host also has the power to kick out users.
+            </p>
+
             <h2 id="session-ended" style="display: none;"></h2>
 
             <div id="form">
-                <p>For video players to synchronize, each session must have a single host and one or more guest users.</p>
-
                 <input type="radio" id="guest_radio" name="host_guest" value="guest" onchange="document.getElementById('btnStartSession').innerHTML = 'Join Session';" checked />
                 <label for="guest_radio">Join an Existing Session</label><br>
                 <input type="radio" id="host_radio" name="host_guest" value="host" onchange="document.getElementById('btnStartSession').innerHTML = 'Create Session';" />
@@ -64,7 +67,7 @@
 
                             <br><br>
                             <div id="host-user-control-buttons" style="display: none;">
-                                <button type="button" class="btn btn-success">Make Selected User Host</button>
+                                <button type="button" class="btn btn-success" onclick="window.alert('Feature coming soon!');">Make Selected User Host</button>
                                 <button type="button" class="btn btn-danger" onclick="socket.send({'type':'kick_user','user':document.getElementById('users-list-child').options[document.getElementById('users-list-child').selectedIndex].value});">Kick Selected User from Session</button>
                             </div>
                         </div>

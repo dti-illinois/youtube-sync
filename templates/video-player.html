@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <script src="static/videojs-websockets-combined.js"></script>
+
+    <div class="body-parent">
+        <div class="body-container">
+            <h1>Youtube-Sync Prototype: Video Player</h1>
+            <a href="/">Return to Homepage</a>
+
+            <br><br>
+
+            <h2 id="session-ended" style="display: none;"></h2>
+
+            <div id="form">
+                <p style="text-align: left;">
+                    <b>Instructions:</b><br>
+                    - For video players to synchronize, each session must have a single host and one or more guest users. For synchronization purposes, everyone will sync with the host,
+                    but any user can pause, resume, or skip throughout the video playback and these actions will affect everyone. The host also has the power to kick out users.
+                    <br>
+                    - To use the player, have one user select the "Host a New Session" option and then type in a name and click "Create Session". Then, have the other users select the "Join an Existing Session" option, type in a name, and click "Join Session". Anyone can pause, play, or skip throughout the video playback.
+                </p>
+
+                <br>
+
+                <input type="radio" id="guest_radio" name="host_guest" value="guest" onchange="document.getElementById('btnStartSession').innerHTML = 'Join Session';" checked />
+                <label for="guest_radio">Join an Existing Session</label><br>
+                <input type="radio" id="host_radio" name="host_guest" value="host" onchange="document.getElementById('btnStartSession').innerHTML = 'Create Session';" />
+                <label for="host_radio">Host a New Session</label><br><br>
+
+                <input type="text" placeholder="Your Name" id="username_input" maxlength="20" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
+                <br><br>
+                <button class="btn btn-success" onclick="session_begin()" id="btnStartSession" disabled>Join Session</button>
+            </div>
+
+            <p id="joining-session" style="display: none"><br><br>Joining session, please wait...<br><br></p>
+            <p id="error-display" style="display: none; color: red;"></p>
+            <p id="host-notice" style="display: none;">Warning: If you close this tab or navigate to a different site, all other users will be disconnected from the session.<br><br></p>
+        </div>
+
+        <div class="video-parent">
+            <div class="video-child">
+                <div id="video-container" style="display: none;">
+                    <video
+                        id="my-video"
+                        class="video-js"
+                        controls
+                        preload="auto"
+                        poster="MY_VIDEO_POSTER.jpg"
+                        data-setup="{}"
+                        >
+                            <source src="static/MY_VIDEO.mp4" type="video/mp4" />
+                            <p class="vjs-no-js">
+                                To view this video please enable JavaScript, and consider upgrading to a web browser that
+                                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                            </p>
+                    </video>
+                </div>
+
+                <br><br>
+            </div>
+        </div>
+
+        <div style="display: block; text-align: center;">
+            <table style="display: inline-block; max-width: 90vw;">
+                <tr>
+                    <td>
+                        <div id="users-list" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left;">
+                            <b style='margin: 0;'>Current Users:</b>
+                            <select id="users-list-child" multiple></select>
+
+                            <br><br>
+                            <div id="host-user-control-buttons" style="display: none;">
+                                <button type="button" class="btn btn-success" onclick="window.alert('Feature coming soon!');">Make Selected User Host</button>
+                                <button type="button" class="btn btn-danger" onclick="socket.send({'type':'kick_user','user':document.getElementById('users-list-child').options[document.getElementById('users-list-child').selectedIndex].value});">Kick Selected User from Session</button>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div id="chat-div" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left;">
+                            <b style='margin: 0;'>Chat:</b>
+                            <select id="chat-box" multiple></select><br>
+                            <input type="text" name="chat-type" id="chat-type" style="margin-right: 8px;" placeholder="Type a message" />
+                            <br class="responsive-br">
+                            <button onclick="sendChatMessage();" class="btn btn-primary">Send</button>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

@@ -13,20 +13,88 @@ body {
     height: 100%;
 }
 
+.body-parent {
+    display: block;
+    text-align: center;
+}
+
 .body-container {
     padding-top: 100px;
     text-align: center;
     color: white;
+    display: inline-block;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (min-width: 1301px) {
     .body-container {
-        max-width: 80vw;
+        width: 50vw;
+    }
+
+    #chat-box {
+        width: 100%;
+    }
+
+    #chat-type {
+        width: 82%;
+    }
+
+    #chat-div {
+        width: 550px;
+        height: 300px;
+    }
+
+    .responsive-br {
+        display: none;
+    }
+
+    #users-list {
+        height: 300px;
+        width: 550px;
+    }
+
+    .video-child {
+        max-width: 50vw;
+    }
+}
+
+@media only screen and (max-width: 1300px) {
+    .body-container {
+        width: 90vw;
+    }
+
+    #chat-box {
+        width: 100%;
+    }
+
+    #chat-type {
+        width: 100%;
+    }
+
+    #chat-div {
+        width: 90vw;
+        height: 350px;
+    }
+
+    .responsive-br {
+        display: initial;
+    }
+
+    #users-list {
+        width: 90vw;
     }
 
     #my-video {
-        max-width: 80vw;
+        max-width: 90vw;
     }
+}
+
+.video-parent {
+    text-align: center;
+    display: block;
+}
+
+.video-child {
+    display: inline-block;
 }
 
 .leftalign {
@@ -39,11 +107,11 @@ h1, h3 {
 
 a {
     color: white !important;
-    display: block;
+    text-decoration: underline !important;
 }
 
 a:hover {
-    color: lightblue;
+    color: lightblue !important;
 }
 
 #users-list-child {
@@ -53,10 +121,18 @@ a:hover {
 
 #chat-box {
     padding: 10px;
-    width: 100%;
     height: 75%;
 }
 
 .username-object {
     padding-left: 5px;
+}
+
+#old-links {
+    display: none;
+}
+
+table, tr {
+    display: flex;
+    flex-wrap: wrap;
 }

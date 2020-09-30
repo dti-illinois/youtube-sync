@@ -14,69 +14,9 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/guest-youtube')
-def guest_youtube():
-    return render_template('guest-youtube.html')
-
-
-@app.route('/host-youtube')
-def host_youtube():
-    return render_template('host-youtube.html')
-
-
-@app.route('/guest-videojs')
-def guest_videojs():
-    return render_template('guest-videojs.html')
-
-
-@app.route('/host-videojs')
-def host_videojs():
-    return render_template('host-videojs.html')
-
-
-@app.route('/host-processor', methods=['POST'])
-def get_data():
-    if request.method == 'POST':
-        print("Writing data to file...")
-        with open("data.json", "wb") as fo:
-            fo.write(request.get_data())
-        return '', 200
-
-
-@app.route('/guest-processor')
-def set_data():
-    with open('data.json', 'r') as dataFile:
-        return dataFile.read()
-
-
-@app.route('/video-test')
-def video_test():
-    return render_template("video-test.html")
-
-
-@app.route('/videojs-freemode')
-def videojs_freemode():
-    return render_template("videojs-freemode.html")
-
-
-@app.route('/websockets-test')
-def websockets_test():
-    return render_template("websockets-test.html")
-
-
-@app.route('/videojs-guest-websockets')
-def videojs_guest_websockets():
-    return render_template("guest-videojs-websockets.html")
-
-
-@app.route('/videojs-host-websockets')
-def videojs_host_websockets():
-    return render_template("host-videojs-websockets.html")
-
-
-@app.route('/videojs-websockets')
+@app.route('/video-player')
 def videojs_websockets_combined():
-    return render_template("videojs-websockets-combined.html")
+    return render_template("video-player.html")
 
 
 @socketio.on('message')

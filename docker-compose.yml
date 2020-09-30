@@ -1,0 +1,9 @@
+version: '3'
+services:
+  video-sync-service:
+    image: video-sync-service:latest
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env

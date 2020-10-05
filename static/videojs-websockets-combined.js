@@ -229,6 +229,10 @@ function GuestMessageHandler(event) {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
             }
+            else if (event["reason"] == "no_host") {
+                document.getElementById("error-display").innerHTML = "<br><br>There is no host in this session. Please either join as the host or have someone else host the session.<br><br>";
+                document.getElementById("error-display").style.display = "initial";
+            }
             else if (event["reason"] == "username_too_long") {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username must be less than 20 characters.<br><br>";
                 document.getElementById("error-display").style.display = "initial";

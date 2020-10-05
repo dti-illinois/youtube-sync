@@ -41,11 +41,18 @@ def handle_message(message):
             if success_joining == False:
                 send({"type": "join_request_response", "value": False, "reason": "username_not_unique"})
             else:
-                send({"type": "join_request_response", "value": True})
-                send({"type": "chat_history", "data": chat_history})
-                send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
-                users.append({"role": "guest", "username": message["name"]})
-                send({"type": "user_data", "data": users}, broadcast=True)
+                success_joining = False
+                for user in users:
+                    if user["role"] == "host":
+                        success_joining = True
+                if success_joining == False:
+                    send({"type": "join_request_response", "value": False, "reason": "no_host"})
+                else:
+                    send({"type": "join_request_response", "value": True})
+                    send({"type": "chat_history", "data": chat_history})
+                    send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
+                    users.append({"role": "guest", "username": message["name"]})
+                    send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "join" and message["role"] == "host":
         success_joining = True
         for user in users:

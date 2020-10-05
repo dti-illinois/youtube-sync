@@ -333,6 +333,19 @@ function initVideo() {
             sendChatMessage();
         }
     }
+
+    // Pings the server to check if there already is a host
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            if (this.responseText == "false") {
+                document.getElementById("host_radio").checked = true;
+                document.getElementById("guest_radio").checked = false;
+            }
+        }
+    }
+    xmlhttp.open("GET", "/current-host-check", true);
+    xmlhttp.send();
 }
 
 // Sends data to the server to be sent to guest users

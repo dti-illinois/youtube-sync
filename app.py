@@ -19,6 +19,18 @@ def videojs_websockets_combined():
     return render_template("video-player.html")
 
 
+@app.route('/current-host-check')
+def current_host_check():
+    host_exists = False
+    for user in users:
+        if user["role"] == "host":
+            host_exists = True
+    if host_exists:
+        return "true"
+    else:
+        return "false"
+
+
 @socketio.on('message')
 def handle_message(message):
     global users

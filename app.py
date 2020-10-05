@@ -47,8 +47,23 @@ def handle_message(message):
                 users.append({"role": "guest", "username": message["name"]})
                 send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "join" and message["role"] == "host":
-        users.append({"role": "host", "username": message["name"]})
-        send({"type": "user_data", "data": users}, broadcast=True)
+        success_joining = True
+        for user in users:
+            if user["role"] == "host":
+                success_joining = False
+        if success_joining == False:
+            send({"type": "host_request_response", "value": False, "reason": "host_already_exists"})
+        else:
+            success_joining = True
+            for user in users:
+                if user["username"] == message["name"]:
+                    success_joining = False
+            if success_joining == False:
+                send({"type": "host_request_response", "value": False, "reason": "username_not_unique"})
+            else:
+                send({"type": "host_request_response", "value": True})
+                users.append({"role": "host", "username": message["name"]})
+                send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "guest":
         for i in range(len(users)):
             if users[i]["username"] == message["name"]:

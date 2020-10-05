@@ -56,37 +56,14 @@ function session_begin() {
 
 // Called when the host creates a new session
 function StartSession() {
-    // Shows the video player
-    document.getElementById("video-container").style.display = "initial";
-
-    // Shows the user list
-    document.getElementById("users-list").style.display = "inline-block";
-
-    // Shows the chat box
-    document.getElementById("chat-div").style.display = "inline-block";
-
-    // Shows the warning telling the host not to close the tab
-    document.getElementById("host-notice").style.display = "initial";
-
-    // Shows the buttons allowing the host to kick/promote users
-    document.getElementById("host-user-control-buttons").style.display = "initial";
+    // Shows the loading message
+    document.getElementById("creating-session").style.display = "initial";
 
     // Tells the webserver the host's username
     socket.send({"type":"join","role":"host","name":username});
 
-    // Sends data to the server whenever the host pauses/resumes/skips the video
-    myVideo.on("play", SetData);
-    myVideo.on("pause", SetData);
-    myVideo.on("seeked", SetData);
-
     // Handle recieving messages from the server
     socket.addEventListener('message', HostMessageHandler);
-
-    // Sends current data to the server
-    SetData();
-
-    // Sends data to the server every 10 seconds
-    var intervalID = window.setInterval(SetData, 10000);
 }
 
 // Handles messages sent from the server to the host
@@ -94,6 +71,58 @@ function HostMessageHandler(event) {
     // If a new guest joined, send them the data of the current state
     if (event["type"] == "guest_joined") {
         SetData();
+    }
+    // Handles responses from the server about a previously sent host request
+    else if (event["type"] == "host_request_response") {
+        // Hides the loading message
+        document.getElementById("creating-session").style.display = "none";
+
+        // If the request was denied
+        if (event["value"] == false) {
+            // Close the websocket
+            socket.close();
+
+            // Re-show the form
+            document.getElementById("form").style.display = "initial";
+
+            // Show the error message
+            if (event["reason"] == "host_already_exists") {
+                document.getElementById("error-display").innerHTML = "<br><br>Sorry, somebody is already hosting this session. Please join as a guest or try again later.<br><br>";
+                document.getElementById("error-display").style.display = "initial";
+            }
+            else if (event["reason"] == "username_not_unique") {
+                document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
+                document.getElementById("error-display").style.display = "initial";
+            }
+        }
+        // If the request was approved
+        else {
+             // Shows the video player
+            document.getElementById("video-container").style.display = "initial";
+
+            // Shows the user list
+            document.getElementById("users-list").style.display = "inline-block";
+
+            // Shows the chat box
+            document.getElementById("chat-div").style.display = "inline-block";
+
+            // Shows the warning telling the host not to close the tab
+            document.getElementById("host-notice").style.display = "initial";
+
+            // Shows the buttons allowing the host to kick/promote users
+            document.getElementById("host-user-control-buttons").style.display = "initial";
+
+            // Sends data to the server whenever the host pauses/resumes/skips the video
+            myVideo.on("play", SetData);
+            myVideo.on("pause", SetData);
+            myVideo.on("seeked", SetData);
+
+           // Sends current data to the server
+            SetData();
+
+            // Sends data to the server every 10 seconds
+            var intervalID = window.setInterval(SetData, 10000);
+        }
     }
     // If the message contains the user list, update that
     else if (event["type"] == "user_data") {

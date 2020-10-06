@@ -19,6 +19,18 @@ def videojs_websockets_combined():
     return render_template("video-player.html")
 
 
+@app.route('/current-host-check')
+def current_host_check():
+    host_exists = False
+    for user in users:
+        if user["role"] == "host":
+            host_exists = True
+    if host_exists:
+        return "true"
+    else:
+        return "false"
+
+
 @socketio.on('message')
 def handle_message(message):
     global users
@@ -41,14 +53,36 @@ def handle_message(message):
             if success_joining == False:
                 send({"type": "join_request_response", "value": False, "reason": "username_not_unique"})
             else:
-                send({"type": "join_request_response", "value": True})
-                send({"type": "chat_history", "data": chat_history})
-                send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
-                users.append({"role": "guest", "username": message["name"]})
-                send({"type": "user_data", "data": users}, broadcast=True)
+                success_joining = False
+                for user in users:
+                    if user["role"] == "host":
+                        success_joining = True
+                if success_joining == False:
+                    send({"type": "join_request_response", "value": False, "reason": "no_host"})
+                else:
+                    send({"type": "join_request_response", "value": True})
+                    send({"type": "chat_history", "data": chat_history})
+                    send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
+                    users.append({"role": "guest", "username": message["name"]})
+                    send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "join" and message["role"] == "host":
-        users.append({"role": "host", "username": message["name"]})
-        send({"type": "user_data", "data": users}, broadcast=True)
+        success_joining = True
+        for user in users:
+            if user["role"] == "host":
+                success_joining = False
+        if success_joining == False:
+            send({"type": "host_request_response", "value": False, "reason": "host_already_exists"})
+        else:
+            success_joining = True
+            for user in users:
+                if user["username"] == message["name"]:
+                    success_joining = False
+            if success_joining == False:
+                send({"type": "host_request_response", "value": False, "reason": "username_not_unique"})
+            else:
+                send({"type": "host_request_response", "value": True})
+                users.append({"role": "host", "username": message["name"]})
+                send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "guest":
         for i in range(len(users)):
             if users[i]["username"] == message["name"]:

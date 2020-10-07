@@ -1,4 +1,4 @@
-PROJECT_NAME := video-sync-service
+PROJECT_NAME := play-service
 
 export PROJECT_NAME := ${PROJECT_NAME}
 

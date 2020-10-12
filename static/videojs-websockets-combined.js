@@ -29,7 +29,8 @@ function session_begin() {
     username = document.getElementById("username_input").value;
 
     // Connects to websockets
-    socket = io.connect('localhost:5000');
+    // socket = io.connect('localhost:5000');
+    socket = io.connect();
 
     // Hides the form element
     document.getElementById("form").style.display = "none";

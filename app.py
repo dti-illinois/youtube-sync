@@ -1,15 +1,34 @@
+# region Imports
+# Used to parse websockets data
 import json
+
+# Webserver code
 from flask import (Flask, render_template, request, jsonify)
+
+# Flask websockets
 from flask_socketio import (SocketIO, send, emit)
 
+# endregion
+
+# region Initialization
+# Initialize app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
+
+# endregion
+
+# Inialize websockets
 socketio = SocketIO(app, cors_allowed_origins='*')
 
+# region Define variables
+# users will store an array of information about each user - their username and their role as a host or a guest
+# chat-history will store the chat history to send to a new user when they join
 users = []
 chat_history = []
+# endregion
 
 
+# region Routing
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -20,6 +39,12 @@ def videojs_websockets_combined():
     return render_template("video-player.html")
 
 
+# endregion
+
+
+# region Current Host Check
+# This is called when the client pings the server to find out if there is already a host
+# (if there isn't one, it will auto-select the "Host" button
 @app.route('/current-host-check')
 def current_host_check():
     host_exists = False
@@ -32,6 +57,10 @@ def current_host_check():
         return "false"
 
 
+# endregion
+
+
+# region Handle websockets messages
 @socketio.on('message')
 def handle_message(message):
     global users
@@ -102,8 +131,10 @@ def handle_message(message):
     elif message["type"] == "chat":
         chat_history.append(message)
         send(message, broadcast=True)
+#endregion
 
 
+# region Websockets connect/disconnect
 @socketio.on('connect')
 def test_connect():
     send({"type": "connection_status", "value": True})
@@ -112,6 +143,7 @@ def test_connect():
 @socketio.on('disconnect')
 def test_disconnect():
     print('Client disconnected')
+# endregion
 
 
 if __name__ == '__main__':

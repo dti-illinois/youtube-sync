@@ -17,3 +17,11 @@ up: build
 
 down:
 	docker-compose down
+
+clean: down
+	docker rm -f $(docker container ls -a | grep play-service | awk '{print $1}') 2>/dev/null || true
+	docker rmi -f $(docker images | grep play-service | awk '{print $3}')
+
+redeploy: deploy
+	aws ecs update-service --cluster dti-play --service dti_play_service --force-new-deployment
+

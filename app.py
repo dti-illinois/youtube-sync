@@ -160,4 +160,5 @@ def test_disconnect():
 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    # socketio.run(app)
+    socketio.run(app, host='play.dti.illinois.edu', port=443)

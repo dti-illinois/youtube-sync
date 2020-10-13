@@ -141,6 +141,10 @@ function HostMessageHandler(event) {
     else if (event["type"] == "chat") {
         UpdateChat(event);
     }
+    // Respond to a roll call
+    else if (event["type"] == "roll_call") {
+        socket.send({"type":"roll_response","role":"host","name":username});
+    }
 }
 
 // Called when a guest joins a session
@@ -210,6 +214,10 @@ function GuestMessageHandler(event) {
     // Shows chat history to a user that joined a session late
     else if (event["type"] == "chat_history") {
         event["data"].forEach(message => UpdateChat(message));
+    }
+    // Respond to a roll call
+    else if (event["type"] == "roll_call") {
+        socket.send({"type":"roll_response","role":"guest","name":username});
     }
     // Handles responses from the server about a previously sent join request
     else if (event["type"] == "join_request_response") {
@@ -310,6 +318,19 @@ function UpdateUserData(event) {
 
 // Called on page load
 function initVideo() {
+    // Pings the server to check if there already is a host
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            if (this.responseText == "false") {
+                document.getElementById("host_radio").checked = true;
+                document.getElementById("guest_radio").checked = false;
+            }
+        }
+    }
+    xmlhttp.open("GET", "/current-host-check", true);
+    xmlhttp.send();
+
     // Gets a pointer to the video.js object
     myVideo = videojs('my-video');
 
@@ -333,19 +354,6 @@ function initVideo() {
             sendChatMessage();
         }
     }
-
-    // Pings the server to check if there already is a host
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            if (this.responseText == "false") {
-                document.getElementById("host_radio").checked = true;
-                document.getElementById("guest_radio").checked = false;
-            }
-        }
-    }
-    xmlhttp.open("GET", "/current-host-check", true);
-    xmlhttp.send();
 }
 
 // Sends data to the server to be sent to guest users

@@ -1,4 +1,3 @@
-# region Imports
 # Used to parse websockets data
 import json
 
@@ -8,27 +7,49 @@ from flask import (Flask, render_template, request, jsonify)
 # Flask websockets
 from flask_socketio import (SocketIO, send, emit)
 
-# endregion
+from threading import Timer
 
-# region Initialization
 # Initialize app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 
-# endregion
-
 # Inialize websockets
 socketio = SocketIO(app, cors_allowed_origins='*')
 
-# region Define variables
+
+def roll_call():
+    global roll_users
+    global users
+    roll_users = []
+    print("Calling roll...")
+    socketio.send({"type": "roll_call"}, broadcast=True)
+    t = Timer(5, update_users_from_roll)
+    t.start()
+
+
+def update_users_from_roll():
+    global users
+    global roll_users
+    users = roll_users
+    found_host = False
+    for user in users:
+        if user["role"] == "host":
+            found_host = True
+    if found_host == False:
+        users = []
+        chat_history = []
+        socketio.send({"type": "host_left"}, broadcast=True)
+    else:
+        socketio.send({"type": "user_data", "data": users}, broadcast=True)
+
+
 # users will store an array of information about each user - their username and their role as a host or a guest
 # chat-history will store the chat history to send to a new user when they join
 users = []
 chat_history = []
-# endregion
+roll_users = []
 
 
-# region Routing
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -39,10 +60,6 @@ def videojs_websockets_combined():
     return render_template("video-player.html")
 
 
-# endregion
-
-
-# region Current Host Check
 # This is called when the client pings the server to find out if there is already a host
 # (if there isn't one, it will auto-select the "Host" button
 @app.route('/current-host-check')
@@ -57,10 +74,6 @@ def current_host_check():
         return "false"
 
 
-# endregion
-
-
-# region Handle websockets messages
 @socketio.on('message')
 def handle_message(message):
     global users
@@ -131,10 +144,10 @@ def handle_message(message):
     elif message["type"] == "chat":
         chat_history.append(message)
         send(message, broadcast=True)
-#endregion
+    elif message["type"] == "roll_response":
+        roll_users.append({"role": message["role"], "username": message["name"]})
 
 
-# region Websockets connect/disconnect
 @socketio.on('connect')
 def test_connect():
     send({"type": "connection_status", "value": True})
@@ -143,7 +156,7 @@ def test_connect():
 @socketio.on('disconnect')
 def test_disconnect():
     print('Client disconnected')
-# endregion
+    roll_call()
 
 
 if __name__ == '__main__':

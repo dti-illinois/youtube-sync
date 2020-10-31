@@ -136,3 +136,16 @@ table, tr {
     display: flex;
     flex-wrap: wrap;
 }
+
+#username_input {
+    width: 200px;
+}
+
+#url_input {
+    width: 380px;
+}
+
+#username_input, #url_input {
+    text-align: center;
+    display: inline-block;
+}

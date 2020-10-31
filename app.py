@@ -48,6 +48,7 @@ def update_users_from_roll():
 users = []
 chat_history = []
 roll_users = []
+url = ""
 
 
 @app.route('/')
@@ -55,9 +56,14 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/video-join-page')
+def video_join_page():
+    return render_template("video-join-page.html")
+
+
 @app.route('/video-player')
 def videojs_websockets_combined():
-    return render_template("video-player.html")
+    return render_template("video-player.html", video_url=url)
 
 
 # This is called when the client pings the server to find out if there is already a host
@@ -73,6 +79,19 @@ def current_host_check():
     else:
         return "false"
 
+
+# Sets the URL parameter when the host joins a session
+@app.route('/host-url-send', methods=['POST'])
+def host_url_send():
+    global url
+
+    host_exists = False
+    for user in users:
+        if user["role"] == "host":
+            host_exists = True
+    if not host_exists:
+        url = request.get_data().decode("UTF-8")
+    return 'OK'
 
 @socketio.on('message')
 def handle_message(message):

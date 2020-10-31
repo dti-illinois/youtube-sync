@@ -1,13 +1,10 @@
 //#region Creating variables
-    // Role of the user.
-    // 0 = host, 1 = guest
-    var role = 1;
-
     // username = the user's username
     // myVideo = the video player object
     // socket = the websocket object
     // updatingPlayer - used to prevent infinite loops
-    var username, myVideo, socket, updatingPlayer;
+    // role - 0 = host, 1 = guest
+    var username, myVideo, socket, updatingPlayer, role;
 //#endregion
 
 // Reports disconnection to the server before the tab is fully closed
@@ -20,29 +17,12 @@ function ReportDisconnection() {
 
 // Called when the user clicks the join/start button, this function happens regardless of if they are a host or a guest
 function session_begin() {
-    // Checks which radio button is selected and makes the user a host if desired
-    if (document.getElementById("host_radio").checked == true) {
-        role = 0;
-    }
-
-    // Sets the username variable
-    username = document.getElementById("username_input").value;
-
     // Connects to websockets
     socket = io.connect();
-
-    // Hides the form element
-    document.getElementById("form").style.display = "none";
 
     // Reports disconnection to the server before the tab is fully closed
     window.addEventListener("beforeunload", ReportDisconnection);
     window.addEventListener("unload", ReportDisconnection);
-
-    // Hides the "session closed by the host" message
-    document.getElementById("session-ended").style.display = "none";
-
-    // Hides the error message (if an error was previously shown)
-    document.getElementById("error-display").style.display = "none";
 
     // If the user is a host
     if (role == 0) {
@@ -89,10 +69,12 @@ function HostMessageHandler(event) {
             if (event["reason"] == "host_already_exists") {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, somebody is already hosting this session. Please join as a guest or try again later.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
             }
             else if (event["reason"] == "username_not_unique") {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
             }
         }
         // If the request was approved
@@ -175,6 +157,7 @@ function GuestMessageHandler(event) {
         // Show the message saying the session ended
         document.getElementById("session-ended").innerHTML = "The session was closed by the host.<br><br>";
         document.getElementById("session-ended").style.display = "initial";
+        document.getElementById("return_after_error_button").style.display = "initial";
 
         // Hide the chat
         document.getElementById("chat-div").style.display = "none";
@@ -201,6 +184,7 @@ function GuestMessageHandler(event) {
             myVideo.pause();
             document.getElementById("session-ended").style.display = "initial";
             document.getElementById("session-ended").innerHTML = "You were kicked from the session.<br><br>";
+            document.getElementById("return_after_error_button").style.display = "initial";
             document.getElementById("users-list").style.display = "none";
             document.getElementById("chat-div").style.display = "none";
             socket.send({"type":"leave", "role":"guest", "name": username});
@@ -236,22 +220,27 @@ function GuestMessageHandler(event) {
             if (event["reason"] == "username_not_unique") {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
             }
             else if (event["reason"] == "no_host") {
                 document.getElementById("error-display").innerHTML = "<br><br>There is no host in this session. Please either join as the host or have someone else host the session.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
             }
             else if (event["reason"] == "username_too_long") {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username must be less than 20 characters.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
             }
             else if (event["reason"] == "username_special_characters") {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot have the characters < or >.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
             }
             else if (event["reason"] == "username_blank") {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot be blank.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
             }
         }
         // If the request was approved
@@ -318,35 +307,11 @@ function UpdateUserData(event) {
 
 // Called on page load
 function initVideo() {
-    // Pings the server to check if there already is a host
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            if (this.responseText == "false") {
-                document.getElementById("host_radio").checked = true;
-                document.getElementById("guest_radio").checked = false;
-            }
-        }
-    }
-    xmlhttp.open("GET", "/current-host-check", true);
-    xmlhttp.send();
+    username = getParams()["username"];
+    role = getParams()["role"];
 
     // Gets a pointer to the video.js object
     myVideo = videojs('my-video');
-
-    // Prevents the user from putting < and > in the username box
-    document.getElementById("username_input").onkeypress = function(e) {
-        if (e.which == 60 || e.which == 62) {
-            e.preventDefault();
-        }
-    }
-
-    // Lets the user press enter to join/start a session
-    document.getElementById("username_input").onkeypress = function(e) {
-        if (e.which == 13) {
-            session_begin();
-        }
-    }
 
     // Lets the user press enter to send a chat message
     document.getElementById("chat-type").onkeypress = function(e) {
@@ -354,6 +319,8 @@ function initVideo() {
             sendChatMessage();
         }
     }
+
+    session_begin();
 }
 
 // Sends data to the server to be sent to guest users

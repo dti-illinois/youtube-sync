@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <script src="static/videojs-websockets-combined.js"></script>
+    <script src="static/video-player.js"></script>
 
     <div class="body-parent">
         <div class="body-container">
@@ -10,8 +10,6 @@
             <a href="/">Return to Homepage</a>
 
             <br><br>
-
-            <h2 id="session-ended" style="display: none;"></h2>
 
             <div id="form">
                 <p style="text-align: left;">
@@ -21,22 +19,13 @@
                     <br>
                     - To use the player, have one user select the "Host a New Session" option and then type in a name and click "Create Session". Then, have the other users select the "Join an Existing Session" option, type in a name, and click "Join Session". Anyone can pause, play, or skip throughout the video playback.
                 </p>
-
-                <br>
-
-                <input type="radio" id="guest_radio" name="host_guest" value="guest" onchange="document.getElementById('btnStartSession').innerHTML = 'Join Session';" checked />
-                <label for="guest_radio">Join an Existing Session</label><br>
-                <input type="radio" id="host_radio" name="host_guest" value="host" onchange="document.getElementById('btnStartSession').innerHTML = 'Create Session';" />
-                <label for="host_radio">Host a New Session</label><br><br>
-
-                <input type="text" placeholder="Your Name" id="username_input" maxlength="20" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else { document.getElementById('btnStartSession').disabled = false; } " />
-                <br><br>
-                <button class="btn btn-success" onclick="session_begin()" id="btnStartSession" disabled>Join Session</button>
             </div>
 
             <p id="creating-session" style="display: none"><br><br>Creating session, please wait...<br><br></p>
             <p id="joining-session" style="display: none"><br><br>Joining session, please wait...<br><br></p>
+            <h2 id="session-ended" style="display: none;"></h2>
             <p id="error-display" style="display: none; color: red;"></p>
+            <br><button class="btn btn-info" onclick="window.location = 'video-join-page';" style="display: none;" id="return_after_error_button">Return to Join Page</button>
             <p id="host-notice" style="display: none;">Warning: If you close this tab or navigate to a different site, all other users will be disconnected from the session.<br><br></p>
         </div>
 
@@ -53,7 +42,7 @@
                             "techOrder": ["youtube"],
                             "sources": [{
                                 "type": "video/youtube",
-                                "src": "https://www.youtube.com/watch?v=2MpUj-Aua48"
+                                "src": "{{ video_url }}"
                             }]
                         }'
                         >

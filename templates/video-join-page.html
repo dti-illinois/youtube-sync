@@ -33,7 +33,7 @@
                 <div class="mb-3">
                     <input type="text" class="form-control" placeholder="Your Name" id="username_input" maxlength="20" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else if (document.getElementById('url_input').value != '' || role == 1) { document.getElementById('btnStartSession').disabled = false; } " />
                     <br><br>
-                    <input type="text" class="form-control" placeholder="YouTube Video URL" value="https://www.youtube.com/watch?v=0BOEJuRaT_Y" id="url_input" maxlength="50" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else if (document.getElementById('username_input').value != ''){ document.getElementById('btnStartSession').disabled = false; } " style="display: none;" />
+                    <input type="text" class="form-control" placeholder="YouTube Video URL" value="https://www.youtube.com/watch?v=LXb3EKWsInQ" id="url_input" maxlength="50" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else if (document.getElementById('username_input').value != ''){ document.getElementById('btnStartSession').disabled = false; } " style="display: none;" />
                     <br><br>
                     <button class="btn btn-success" onclick="session_begin()" id="btnStartSession" disabled>Join Session</button>
                 </div>

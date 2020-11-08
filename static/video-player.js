@@ -301,6 +301,9 @@ function UpdateUserData(event) {
             host_style = " style='font-weight: bold;'";
             suffix = " (Host)";
         }
+        if (element["username"] == username) {
+            suffix += " (You)";
+        }
         document.getElementById("users-list-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + element["username"] + "'> - " + element["username"] + suffix + "</option>");
     });
 }

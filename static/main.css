@@ -53,7 +53,12 @@ body {
     }
 
     .video-child {
-        max-width: 50vw;
+
+    }
+
+    #my-video {
+        width: 75vw;
+        height: 56vh;
     }
 }
 
@@ -84,7 +89,8 @@ body {
     }
 
     #my-video {
-        max-width: 90vw;
+        width: 90vw;
+        height: 68vh;
     }
 }
 

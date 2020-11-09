@@ -84,13 +84,14 @@ def current_host_check():
 @app.route('/host-url-send', methods=['POST'])
 def host_url_send():
     global url
-
+    print("Getting to the URL page")
     host_exists = False
     for user in users:
         if user["role"] == "host":
             host_exists = True
     if not host_exists:
         url = request.get_data().decode("UTF-8")
+        print("URL is " + url)
     return 'OK'
 
 @socketio.on('message')

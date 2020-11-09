@@ -6,6 +6,9 @@ var username, url;
 
 // Called when the user clicks the join/start button, this function happens regardless of if they are a host or a guest
 function session_begin() {
+    // Shows the loading message
+    document.getElementById("session-loading").style.display = "initial";
+
     // Checks which radio button is selected and makes the user a host if desired
     if (document.getElementById("host_radio").checked == true) {
         role = 0;
@@ -16,7 +19,9 @@ function session_begin() {
             type: "POST" ,
             url: "/host-url-send",
             data: url,
-            success: function(data) {},
+            success: function(data) {
+                finish_session_begin();
+            },
             error: function(data) {
                 if (data.responseText != undefined) {
                     alert("Error: " + data.responseText);
@@ -24,7 +29,12 @@ function session_begin() {
             }
         });
     }
+    else {
+        finish_session_begin();
+    }
+}
 
+function finish_session_begin() {
     // Sets the username variable
     username = document.getElementById("username_input").value;
 

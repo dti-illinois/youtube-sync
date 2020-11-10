@@ -38,6 +38,7 @@ def update_users_from_roll():
     if found_host == False:
         users = []
         chat_history = []
+        url = ""
         socketio.send({"type": "host_left"}, broadcast=True)
     else:
         socketio.send({"type": "user_data", "data": users}, broadcast=True)
@@ -84,7 +85,6 @@ def current_host_check():
 @app.route('/host-url-send', methods=['POST'])
 def host_url_send():
     global url
-    print("Getting to the URL page")
     host_exists = False
     for user in users:
         if user["role"] == "host":
@@ -154,6 +154,7 @@ def handle_message(message):
     elif message["type"] == "leave" and message["role"] == "host":
         users = []
         chat_history = []
+        url = ""
         send({"type": "host_left"}, broadcast=True)
     elif message["type"] == "host_data":
         send({"type": "player_data", "data": message["data"]}, broadcast=True)

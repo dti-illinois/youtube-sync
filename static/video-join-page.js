@@ -53,6 +53,11 @@ function finish_session_begin() {
 }
 
 function initVideo() {
+    console.log("initVideo called");
+    if (document.getElementById("host_radio").checked == true) {
+        HostBoxChecked();
+    }
+
     // Prevents the user from putting < and > in the username box
     document.getElementById("username_input").onkeypress = function(e) {
         if (e.which == 60 || e.which == 62) {

@@ -68,7 +68,7 @@
                             <br><br>
                             <div id="host-user-control-buttons" style="display: none;">
                                 <button type="button" class="btn btn-success" onclick="window.alert('Feature coming soon!');">Make Selected User Host</button>
-                                <button type="button" class="btn btn-danger" onclick="socket.send({'type':'kick_user','user':document.getElementById('users-list-child').options[document.getElementById('users-list-child').selectedIndex].value});">Kick Selected User from Session</button>
+                                <button type="button" class="btn btn-danger" onclick="socket.send({'type':'kick_user','secret_key': secret_key, 'user':document.getElementById('users-list-child').options[document.getElementById('users-list-child').selectedIndex].value});">Kick Selected User from Session</button>
                             </div>
                         </div>
                     </td>

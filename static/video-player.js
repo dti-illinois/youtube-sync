@@ -4,7 +4,8 @@
     // socket = the websocket object
     // updatingPlayer - used to prevent infinite loops
     // role - 0 = host, 1 = guest
-    var username, myVideo, socket, updatingPlayer, role;
+    // secret_key = secret key used to verify transactions between server and host client
+    var username, myVideo, socket, updatingPlayer, role, secret_key;
 //#endregion
 
 // Reports disconnection to the server before the tab is fully closed
@@ -57,28 +58,11 @@ function HostMessageHandler(event) {
         // Hides the loading message
         document.getElementById("creating-session").style.display = "none";
 
-        // If the request was denied
-        if (event["value"] == false) {
-            // Close the websocket
-            socket.close();
-
-            // Re-show the form
-            document.getElementById("form").style.display = "initial";
-
-            // Show the error message
-            if (event["reason"] == "host_already_exists") {
-                document.getElementById("error-display").innerHTML = "<br><br>Sorry, somebody is already hosting this session. Please join as a guest or try again later.<br><br>";
-                document.getElementById("error-display").style.display = "initial";
-                document.getElementById("return_after_error_button").style.display = "initial";
-            }
-            else if (event["reason"] == "username_not_unique") {
-                document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
-                document.getElementById("error-display").style.display = "initial";
-                document.getElementById("return_after_error_button").style.display = "initial";
-            }
-        }
         // If the request was approved
-        else {
+        if (event["value"] == true) {
+            // Get secret key used to verify transactions
+            secret_key = event["secret_key"];
+
              // Shows the video player
             document.getElementById("video-container").style.display = "initial";
 
@@ -107,6 +91,26 @@ function HostMessageHandler(event) {
 
             // Sends data to the server every 10 seconds
             var intervalID = window.setInterval(SetData, 10000);
+        }
+
+        // If the request was denied
+        else {
+            // Close the websocket
+            socket.close();
+
+            // Re-show the form
+            document.getElementById("form").style.display = "initial";
+
+            // Show the error message
+            if (event["reason"] == "host_already_exists") {
+                document.getElementById("error-display").innerHTML = "<br><br>Sorry, somebody is already hosting this session. Please join as a guest or try again later.<br><br>";
+                document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
+            } else if (event["reason"] == "username_not_unique") {
+                document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
+                document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
+            }
         }
     }
     // If the message contains the user list, update that
@@ -337,7 +341,7 @@ function SetData() {
         Paused: myVideo.paused()
     });
 
-    socket.send({"type":"host_data","action":"set","data":dataToSet});
+    socket.send({"type":"host_data","action":"set","data":dataToSet, "secret_key": secret_key});
 }
 
 // Sends a chat message

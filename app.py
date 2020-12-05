@@ -1,6 +1,9 @@
 # Used to parse websockets data
 import json
 
+import random
+import string
+
 # Webserver code
 from flask import (Flask, render_template, request, jsonify)
 
@@ -30,6 +33,7 @@ def roll_call():
 def update_users_from_roll():
     global users
     global roll_users
+    global secret_key
     users = roll_users
     found_host = False
     for user in users:
@@ -37,6 +41,7 @@ def update_users_from_roll():
             found_host = True
     if found_host == False:
         users = []
+        secret_key = ""
         chat_history = []
         url = ""
         socketio.send({"type": "host_left"}, broadcast=True)
@@ -50,6 +55,7 @@ users = []
 chat_history = []
 roll_users = []
 url = ""
+secret_key = ""
 
 
 @app.route('/')
@@ -98,6 +104,8 @@ def host_url_send():
 def handle_message(message):
     global users
     global chat_history
+    global secret_key
+    global url
 
     print('Received message: ' + str(message))
     if message["type"] == "join" and message["role"] == "guest":
@@ -143,7 +151,8 @@ def handle_message(message):
             if success_joining == False:
                 send({"type": "host_request_response", "value": False, "reason": "username_not_unique"})
             else:
-                send({"type": "host_request_response", "value": True})
+                secret_key = ''.join((random.choice(string.ascii_letters + string.digits) for i in range(25)))
+                send({"type": "host_request_response", "value": True, "secret_key": secret_key})
                 users.append({"role": "host", "username": message["name"]})
                 send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "guest":
@@ -153,15 +162,18 @@ def handle_message(message):
         send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "host":
         users = []
+        secret_key = ""
         chat_history = []
         url = ""
         send({"type": "host_left"}, broadcast=True)
     elif message["type"] == "host_data":
-        send({"type": "player_data", "data": message["data"]}, broadcast=True)
+        if (message["secret_key"] == secret_key):
+            send({"type": "player_data", "data": message["data"]}, broadcast=True)
     elif message["type"] == "guest_data":
         send({"type": "guest_data", "action": message["action"], "timestamp": message["timestamp"]}, broadcast=True)
     elif message["type"] == "kick_user":
-        send(message, broadcast=True)
+        if (message["secret_key"] == secret_key):
+            send(message, broadcast=True)
     elif message["type"] == "chat":
         chat_history.append(message)
         send(message, broadcast=True)

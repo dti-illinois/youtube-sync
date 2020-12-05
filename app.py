@@ -179,6 +179,10 @@ def handle_message(message):
         send(message, broadcast=True)
     elif message["type"] == "roll_response":
         roll_users.append({"role": message["role"], "username": message["name"]})
+    elif message["type"] == "remove_chat_message":
+        if message["secret_key"] == secret_key:
+            send({"type": "remove_chat_message", "message_index": message["message_index"]}, broadcast=True)
+            chat_history.pop(message["message_index"])
 
 
 @socketio.on('connect')

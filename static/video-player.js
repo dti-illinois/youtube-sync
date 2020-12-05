@@ -134,6 +134,9 @@ function HostMessageHandler(event) {
     else if (event["type"] == "roll_call") {
         socket.send({"type":"roll_response","role":"host","name":username});
     }
+    else if (event["type"] == "remove_chat_message") {
+        document.getElementById('chat-box').remove(event["message_index"]);
+    }
 }
 
 // Called when a guest joins a session
@@ -174,6 +177,9 @@ function GuestMessageHandler(event) {
 
         // Close the websocket connection
         socket.close();
+    }
+    else if (event["type"] == "remove_chat_message") {
+        document.getElementById('chat-box').remove(event["message_index"]);
     }
     // Handle recieivng user data
     else if (event["type"] == "user_data") {

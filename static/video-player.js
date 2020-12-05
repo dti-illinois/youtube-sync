@@ -93,6 +93,9 @@ function HostMessageHandler(event) {
 
             // Shows the buttons allowing the host to kick/promote users
             document.getElementById("host-user-control-buttons").style.display = "initial";
+            document.getElementById("host-chat-control-buttons").style.display = "initial";
+            document.getElementById("chat-box").style.height = "65%";
+            document.getElementById("users-list-child").style.height = "65%";
 
             // Sends data to the server whenever the host pauses/resumes/skips the video
             myVideo.on("play", SetData);

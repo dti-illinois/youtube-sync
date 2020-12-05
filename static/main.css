@@ -123,6 +123,7 @@ a:hover {
 #users-list-child {
     padding: 10px;
     width: 100%;
+    height: 90%;
 }
 
 #chat-box {

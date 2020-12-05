@@ -23,7 +23,7 @@ def roll_call():
     roll_users = []
     print("Calling roll...")
     socketio.send({"type": "roll_call"}, broadcast=True)
-    t = Timer(5, update_users_from_roll)
+    t = Timer(10, update_users_from_roll)
     t.start()
 
 

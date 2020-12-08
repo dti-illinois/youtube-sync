@@ -106,3 +106,21 @@ function GuestBoxChecked() {
         document.getElementById('btnStartSession').disabled = false;
     }
 }
+
+function HandleUsernameInput(box) {
+    if (box.value == '') {
+        document.getElementById('btnStartSession').disabled = true;
+    }
+    else if (document.getElementById('url_input').value != '' || role == 1) {
+        document.getElementById('btnStartSession').disabled = false;
+    }
+}
+
+function HandleURLInput(box) {
+    if (box.value == '') {
+        document.getElementById('btnStartSession').disabled = true;
+    }
+    else if (document.getElementById('username_input').value != '') {
+        document.getElementById('btnStartSession').disabled = false;
+    }
+}

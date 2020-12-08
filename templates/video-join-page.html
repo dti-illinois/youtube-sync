@@ -12,11 +12,11 @@
 
             <br><br>
 
-            <h2 id="session-ended" style="display: none;"></h2>
-            <p id="session-loading" style="display: none;">Joining session, please wait...</p>
+            <h2 id="session-ended" class="hidden"></h2>
+            <p id="session-loading" class="hidden">Joining session, please wait...</p>
 
             <div id="form">
-                <p style="text-align: left;">
+                <p class="leftalign">
                     <b>Instructions:</b><br>
                     - For video players to synchronize, each session must have a single host and one or more guest users. For synchronization purposes, everyone will sync with the host,
                     but any user can pause, resume, or skip throughout the video playback and these actions will affect everyone. The host also has the power to kick out users.
@@ -32,18 +32,18 @@
                 <label for="host_radio">Host a New Session</label><br><br>
 
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Your Name" id="username_input" maxlength="20" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else if (document.getElementById('url_input').value != '' || role == 1) { document.getElementById('btnStartSession').disabled = false; } " />
+                    <input type="text" class="form-control" placeholder="Your Name" id="username_input" maxlength="20" oninput="HandleUsernameInput(this)" />
                     <br><br>
-                    <input type="text" class="form-control" placeholder="YouTube Video URL" value="https://www.youtube.com/watch?v=LXb3EKWsInQ" id="url_input" maxlength="50" oninput="if (this.value == '') { document.getElementById('btnStartSession').disabled = true; } else if (document.getElementById('username_input').value != ''){ document.getElementById('btnStartSession').disabled = false; } " style="display: none;" />
+                    <input type="text" class="form-control" placeholder="YouTube Video URL" value="https://www.youtube.com/watch?v=LXb3EKWsInQ" id="url_input" maxlength="50" oninput="HandleURLInput(this)" class="hidden" />
                     <br><br>
                     <button class="btn btn-success" onclick="session_begin()" id="btnStartSession" disabled>Join Session</button>
                 </div>
             </div>
 
-            <p id="creating-session" style="display: none"><br><br>Creating session, please wait...<br><br></p>
-            <p id="joining-session" style="display: none"><br><br>Joining session, please wait...<br><br></p>
-            <p id="error-display" style="display: none; color: red;"></p>
-            <p id="host-notice" style="display: none;">Warning: If you close this tab or navigate to a different site, all other users will be disconnected from the session.<br><br></p>
+            <p id="creating-session" class="hidden"><br><br>Creating session, please wait...<br><br></p>
+            <p id="joining-session" class="hidden"><br><br>Joining session, please wait...<br><br></p>
+            <p id="error-display" class="hidden error"></p>
+            <p id="host-notice" class="hidden">Warning: If you close this tab or navigate to a different site, all other users will be disconnected from the session.<br><br></p>
         </div>
     </div>
 

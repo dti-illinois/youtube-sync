@@ -156,3 +156,11 @@ table, tr {
     text-align: center;
     display: inline-block;
 }
+
+.hidden {
+    display: none;
+}
+
+.error {
+    color: red;
+}

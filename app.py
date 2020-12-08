@@ -1,6 +1,8 @@
-# Used to parse websockets data
+# region Imports
+# Used to parse response data
 import json
 
+# Used to generate secret key
 import random
 import string
 
@@ -10,50 +12,82 @@ from flask import (Flask, render_template, request, jsonify)
 # Flask websockets
 from flask_socketio import (SocketIO, send, emit)
 
+# Used to time roll-call responses
 from threading import Timer
+# endregion
 
+# region Initialization
 # Initialize app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 
-# Inialize websockets
+# Initialize websockets
 socketio = SocketIO(app, cors_allowed_origins='*')
+# endregion
+
+# region Define variables
+# Stores an array of information about each user - their username and their role as a host or a guest
+users = []
+
+# Stores the chat history to send to a new user when they join
+chat_history = []
+
+# Used when calling roll to keep track of user responses
+roll_users = []
+
+# The URL of the YouTube video
+url = ""
+
+# The secret key to be shared with the host
+secret_key = ""
+#endregion
 
 
+# region Roll Call
+# Called when a client disconnects
 def roll_call():
     global roll_users
     global users
+
+    # Clear roll_users
     roll_users = []
+
+    # Log
     print("Calling roll...")
+
+    # Sends a message to the clients requesting a roll response
     socketio.send({"type": "roll_call"}, broadcast=True)
+
+    # Wait 10 seconds
     t = Timer(10, update_users_from_roll)
     t.start()
 
 
+# Called 10 seconds after client disconnection
 def update_users_from_roll():
     global users
     global roll_users
     global secret_key
+
     found_host = False
+
+    # Iterates over all user responses and looks for a host
     for user in roll_users:
         if user["role"] == "host":
             found_host = True
-    if found_host == False:
+
+    # If no host, reset and send message to clients
+    if not found_host:
         reset()
         socketio.send({"type": "host_left"}, broadcast=True)
+
+    # If there was a host, send updated user data to clients
     else:
         socketio.send({"type": "user_data", "data": users}, broadcast=True)
+# endregion
 
 
-# users will store an array of information about each user - their username and their role as a host or a guest
-# chat-history will store the chat history to send to a new user when they join
-users = []
-chat_history = []
-roll_users = []
-url = ""
-secret_key = ""
-
-
+# Resets all data to the original state
 def reset():
     global users
     global chat_history
@@ -83,7 +117,7 @@ def videojs_websockets_combined():
 
 
 # This is called when the client pings the server to find out if there is already a host
-# (if there isn't one, it will auto-select the "Host" button
+# If there isn't one, the client will auto-select the "Host" button
 @app.route('/current-host-check')
 def current_host_check():
     host_exists = False
@@ -109,6 +143,8 @@ def host_url_send():
         print("URL is " + url)
     return 'OK'
 
+
+# region Websockets Message Handle
 @socketio.on('message')
 def handle_message(message):
     global users
@@ -116,7 +152,10 @@ def handle_message(message):
     global secret_key
     global url
 
+    # Log
     print('Received message: ' + str(message))
+
+    # region Guest Join Requests
     if message["type"] == "join" and message["role"] == "guest":
         print("Recieved join request")
         if len(message["name"]) > 20:
@@ -145,6 +184,9 @@ def handle_message(message):
                     send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
                     users.append({"role": "guest", "username": message["name"]})
                     send({"type": "user_data", "data": users}, broadcast=True)
+    # endregion Join Requests
+
+    # region Host Join Requests
     elif message["type"] == "join" and message["role"] == "host":
         host_exists = True
         for user in users:
@@ -168,44 +210,69 @@ def handle_message(message):
                 send({"type": "host_request_response", "value": True, "secret_key": secret_key})
                 users.append({"role": "host", "username": message["name"]})
                 send({"type": "user_data", "data": users}, broadcast=True)
+    # endregion
+
+    # region Guest Leaving
     elif message["type"] == "leave" and message["role"] == "guest":
         for i in range(len(users)):
             if users[i]["username"] == message["name"]:
                 del users[i]
         send({"type": "user_data", "data": users}, broadcast=True)
+    # endregion
+
+    # region Host Leaving
     elif message["type"] == "leave" and message["role"] == "host":
         reset()
         send({"type": "host_left"}, broadcast=True)
+    # endregion
+
+    # region Host Video Data
     elif message["type"] == "host_data":
         if (message["secret_key"] == secret_key):
             send({"type": "player_data", "data": message["data"]}, broadcast=True)
+    # endregion
+
+    # region Guest Video Data
     elif message["type"] == "guest_data":
         send({"type": "guest_data", "action": message["action"], "timestamp": message["timestamp"]}, broadcast=True)
+    # endregion
+
+    # region User Kick Requests
     elif message["type"] == "kick_user":
-        if (message["secret_key"] == secret_key):
+        if message["secret_key"] == secret_key:
             send(message, broadcast=True)
+    # endregion
+
+    # region Chat Messages
     elif message["type"] == "chat":
         chat_history.append(message)
         send(message, broadcast=True)
+    # endregion
+
+    # region Roll Call Responses
     elif message["type"] == "roll_response":
         roll_users.append({"role": message["role"], "username": message["name"]})
+    # endregion
+
+    # region Chat Message Removal
     elif message["type"] == "remove_chat_message":
         if message["secret_key"] == secret_key:
             send({"type": "remove_chat_message", "message_index": message["message_index"]}, broadcast=True)
             chat_history.pop(message["message_index"])
-
+    # endregion
+# endregion
 
 @socketio.on('connect')
-def test_connect():
+def connection():
     send({"type": "connection_status", "value": True})
 
 
 @socketio.on('disconnect')
-def test_disconnect():
+def disconnection():
     print('Client disconnected')
     roll_call()
 
 
+# Run app
 if __name__ == '__main__':
-    # socketio.run(app)
     socketio.run(app, host='play.dti.illinois.edu', port=443)

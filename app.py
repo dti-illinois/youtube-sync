@@ -146,12 +146,16 @@ def handle_message(message):
                     users.append({"role": "guest", "username": message["name"]})
                     send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "join" and message["role"] == "host":
-        success_joining = True
+        host_exists = True
         for user in users:
             if user["role"] == "host":
-                success_joining = False
-        if success_joining == False:
+                host_exists = False
+        if host_exists == False:
             send({"type": "host_request_response", "value": False, "reason": "host_already_exists"})
+        elif "<" in message["name"] or ">" in message["name"] or "(" in message["name"] or ")" in message["name"]:
+            send({"type": "host_request_response", "value": False, "reason": "username_special_characters"})
+        elif len(message["name"]) > 20:
+            send({"type": "host_request_response", "value": False, "reason": "username_too_long"})
         else:
             success_joining = True
             for user in users:

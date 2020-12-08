@@ -108,8 +108,19 @@ function HostMessageHandler(event) {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, somebody is already hosting this session. Please join as a guest or try again later.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
                 document.getElementById("return_after_error_button").style.display = "initial";
-            } else if (event["reason"] == "username_not_unique") {
+            }
+            else if (event["reason"] == "username_not_unique") {
                 document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
+                document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
+            }
+            else if (event["reason"] == "username_special_characters") {
+                document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot have the characters <, >, (, or ).<br><br>";
+                document.getElementById("error-display").style.display = "initial";
+                document.getElementById("return_after_error_button").style.display = "initial";
+            }
+            else if (event["reason"] == "username_too_long") {
+                document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username must be less than 25 characters.<br><br>";
                 document.getElementById("error-display").style.display = "initial";
                 document.getElementById("return_after_error_button").style.display = "initial";
             }

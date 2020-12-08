@@ -81,7 +81,7 @@
                             <br class="responsive-br">
                             <button onclick="sendChatMessage();" class="btn btn-primary">Send</button>
                             <div id="host-chat-control-buttons" style="display: none;">
-                                <button class="btn btn-danger" onclick="socket.send({'type':'remove_chat_message','secret_key': secret_key, 'message_index': document.getElementById('chat-box').selectedIndex});">Remove Chat Message</button>
+                                <button class="btn btn-danger" onclick="socket.send({'type':'remove_chat_message','secret_key': secret_key, 'message_index': document.getElementById('chat-box').selectedIndex});">Remove Selected Chat Message</button>
                             </div>
                         </div>
                     </td>

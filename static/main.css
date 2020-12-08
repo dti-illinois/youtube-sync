@@ -126,6 +126,16 @@ a:hover {
     height: 90%;
 }
 
+#users-list {
+    display: none;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 7px;
+    color: black;
+    padding: 25px 45px 25px 25px;
+    text-align: left;
+}
+
 #chat-box {
     padding: 10px;
     height: 75%;
@@ -163,4 +173,34 @@ table, tr {
 
 .error {
     color: red;
+}
+
+#chat-div {
+    display: none;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 7px;
+    color: black;
+    padding: 25px 45px 25px 25px;
+}
+
+#chat-type {
+    margin-right: 8px;
+}
+
+.centeralign {
+    text-align: center;
+}
+
+.block {
+    display: block;
+}
+
+.nomargin {
+    margin: 0;
+}
+
+#users-list-table {
+    display: inline-block;
+    max-width: 90vw;
 }

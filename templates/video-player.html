@@ -12,7 +12,7 @@
             <br><br>
 
             <div id="form">
-                <p style="text-align: left;">
+                <p class="leftalign">
                     <b>Instructions:</b><br>
                     - For video players to synchronize, each session must have a single host and one or more guest users. For synchronization purposes, everyone will sync with the host,
                     but any user can pause, resume, or skip throughout the video playback and these actions will affect everyone. The host also has the power to kick out users.
@@ -21,17 +21,17 @@
                 </p>
             </div>
 
-            <p id="creating-session" style="display: none"><br><br>Creating session, please wait...<br><br></p>
-            <p id="joining-session" style="display: none"><br><br>Joining session, please wait...<br><br></p>
-            <h2 id="session-ended" style="display: none;"></h2>
-            <p id="error-display" style="display: none; color: red;"></p>
-            <br><button class="btn btn-info" onclick="window.location = 'video-join-page';" style="display: none;" id="return_after_error_button">Return to Join Page</button>
-            <p id="host-notice" style="display: none;">Warning: If you close this tab or navigate to a different site, all other users will be disconnected from the session.<br><br></p>
+            <p id="creating-session" class="hidden"><br><br>Creating session, please wait...<br><br></p>
+            <p id="joining-session" class="hidden"><br><br>Joining session, please wait...<br><br></p>
+            <h2 id="session-ended" class="hidden"></h2>
+            <p id="error-display" class="hidden error"></p>
+            <br><button class="btn btn-info" onclick="window.location = 'video-join-page';" class="hidden" id="return_after_error_button">Return to Join Page</button>
+            <p id="host-notice" class="hidden">Warning: If you close this tab or navigate to a different site, all other users will be disconnected from the session.<br><br></p>
         </div>
 
         <div class="video-parent">
             <div class="video-child">
-                <div id="video-container" style="display: none;">
+                <div id="video-container" class="hidden">
                     <video
                         id="my-video"
                         class="video-js"
@@ -57,16 +57,16 @@
             </div>
         </div>
 
-        <div style="display: block; text-align: center;">
-            <table style="display: inline-block; max-width: 90vw;">
+        <div class="centeralign block">
+            <table id="users-list-table">
                 <tr>
                     <td>
-                        <div id="users-list" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left;">
-                            <b style='margin: 0;'>Current Users:</b>
+                        <div id="users-list">
+                            <b class="nomargin">Current Users:</b>
                             <select id="users-list-child" multiple></select>
 
                             <br><br>
-                            <div id="host-user-control-buttons" style="display: none;">
+                            <div id="host-user-control-buttons" class="hidden">
                                 <button type="button" class="btn btn-success" onclick="window.alert('Feature coming soon!');">Make Selected User Host</button>
                                 <button type="button" class="btn btn-danger" onclick="KickUser();">Kick Selected User from Session</button>
                             </div>
@@ -74,13 +74,13 @@
                     </td>
 
                     <td>
-                        <div id="chat-div" style="display: none; background-color: white; border: 2px solid black; border-radius: 7px; color: black; padding: 25px 45px 25px 25px; text-align: left;">
-                            <b style='margin: 0;'>Chat:</b>
+                        <div id="chat-div">
+                            <b class="nomargin">Chat:</b>
                             <select id="chat-box" multiple></select><br>
-                            <input type="text" name="chat-type" id="chat-type" style="margin-right: 8px;" placeholder="Type a message" />
+                            <input type="text" name="chat-type" id="chat-type" placeholder="Type a message" />
                             <br class="responsive-br">
                             <button onclick="sendChatMessage();" class="btn btn-primary">Send</button>
-                            <div id="host-chat-control-buttons" style="display: none;">
+                            <div id="host-chat-control-buttons" class="hidden">
                                 <button class="btn btn-danger" onclick="socket.send({'type':'remove_chat_message','secret_key': secret_key, 'message_index': document.getElementById('chat-box').selectedIndex});">Remove Selected Chat Message</button>
                             </div>
                         </div>

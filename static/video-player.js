@@ -49,6 +49,8 @@ function StartSession() {
 
 // Handles messages sent from the server to the host
 function HostMessageHandler(event) {
+    console.log("Recieved message" + JSON.stringify(event));
+
     // If a new guest joined, send them the data of the current state
     if (event["type"] == "guest_joined") {
         SetData();
@@ -153,6 +155,8 @@ function JoinSession() {
 
 // Handles messages sent from the server to the guest
 function GuestMessageHandler(event) {
+    console.log("Recieved message" + JSON.stringify(event));
+
     // If the host left, leave the session
     if (event["type"] == "host_left") {
         // Re-show the join form
@@ -246,7 +250,7 @@ function GuestMessageHandler(event) {
                 document.getElementById("return_after_error_button").style.display = "initial";
             }
             else if (event["reason"] == "username_special_characters") {
-                document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot have the characters < or >.<br><br>";
+                document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot have the characters <, >, (, or ).<br><br>";
                 document.getElementById("error-display").style.display = "initial";
                 document.getElementById("return_after_error_button").style.display = "initial";
             }
@@ -366,5 +370,20 @@ function UpdatePlayer(PlayerData) {
         myVideo.pause();
     } else {
         myVideo.play();
+    }
+}
+
+function KickUser() {
+    var selectedUser = document.getElementById('users-list-child').options[document.getElementById('users-list-child').selectedIndex].value;
+
+    if (selectedUser != username) {
+        socket.send({
+            'type': 'kick_user',
+            'secret_key': secret_key,
+            'user': selectedUser
+        });
+    }
+    else {
+        alert("You cannot kick yourself!");
     }
 }

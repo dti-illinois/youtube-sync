@@ -53,17 +53,17 @@ function finish_session_begin() {
 }
 
 function initVideo() {
-    console.log("initVideo called");
     if (document.getElementById("host_radio").checked == true) {
         HostBoxChecked();
     }
 
-    // Prevents the user from putting < and > in the username box
-    document.getElementById("username_input").onkeypress = function(e) {
-        if (e.which == 60 || e.which == 62) {
+    // Prevents the user from putting <, >, (, and ) in the username box
+    document.getElementById("username_input").addEventListener("keypress", function(e) {
+        if (e.which == 60 || e.which == 62 || e.which == 40 || e.which == 41) {
             e.preventDefault();
         }
-    }
+    });
+
 
     // Lets the user press enter to join/start a session
     document.getElementById("username_input").onkeypress = function(e) {

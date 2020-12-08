@@ -34,16 +34,12 @@ def update_users_from_roll():
     global users
     global roll_users
     global secret_key
-    users = roll_users
     found_host = False
-    for user in users:
+    for user in roll_users:
         if user["role"] == "host":
             found_host = True
     if found_host == False:
-        users = []
-        secret_key = ""
-        chat_history = []
-        url = ""
+        reset()
         socketio.send({"type": "host_left"}, broadcast=True)
     else:
         socketio.send({"type": "user_data", "data": users}, broadcast=True)
@@ -56,6 +52,19 @@ chat_history = []
 roll_users = []
 url = ""
 secret_key = ""
+
+
+def reset():
+    global users
+    global chat_history
+    global roll_users
+    global url
+    global secret_key
+    users = []
+    chat_history = []
+    roll_users = []
+    url = ""
+    secret_key = ""
 
 
 @app.route('/')
@@ -112,7 +121,7 @@ def handle_message(message):
         print("Recieved join request")
         if len(message["name"]) > 20:
             send({"type": "join_request_response", "value": False, "reason": "username_too_long"})
-        elif "<" in message["name"] or ">" in message["name"]:
+        elif "<" in message["name"] or ">" in message["name"] or "(" in message["name"] or ")" in message["name"]:
             send({"type": "join_request_response", "value": False, "reason": "username_special_characters"})
         elif message["name"] == "":
             send({"type": "join_request_response", "value": False, "reason": "username_blank"})
@@ -161,10 +170,7 @@ def handle_message(message):
                 del users[i]
         send({"type": "user_data", "data": users}, broadcast=True)
     elif message["type"] == "leave" and message["role"] == "host":
-        users = []
-        secret_key = ""
-        chat_history = []
-        url = ""
+        reset()
         send({"type": "host_left"}, broadcast=True)
     elif message["type"] == "host_data":
         if (message["secret_key"] == secret_key):

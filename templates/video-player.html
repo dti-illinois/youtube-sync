@@ -62,7 +62,7 @@
                 <tr>
                     <td>
                         <div id="users-list">
-                            <b class="nomargin">Current Users:</b>
+                            <b class="div-box-heading">Current Users:</b>
                             <select id="users-list-child" multiple></select>
 
                             <br><br>
@@ -75,7 +75,7 @@
 
                     <td>
                         <div id="chat-div">
-                            <b class="nomargin">Chat:</b>
+                            <b class="div-box-heading">Chat:</b>
                             <select id="chat-box" multiple></select><br>
                             <input type="text" name="chat-type" id="chat-type" placeholder="Type a message" />
                             <br class="responsive-br">
@@ -83,6 +83,17 @@
                             <div id="host-chat-control-buttons" class="hidden">
                                 <button class="btn btn-danger" onclick="socket.send({'type':'remove_chat_message','secret_key': secret_key, 'message_index': document.getElementById('chat-box').selectedIndex});">Remove Selected Chat Message</button>
                             </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div id="video-controls-div">
+                            <b class="div-box-heading">Video Controls:</b><br><br>
+                            <p>
+                                Change Video URL:<br>
+                                <input type="text" id="new-url-type" placeholder="New Video URL" />
+                                <button class="btn btn-primary" onclick="ChangeVideoURL();">Change Video URL</button>
+                            </p>
                         </div>
                     </td>
                 </tr>

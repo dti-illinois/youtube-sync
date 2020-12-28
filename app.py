@@ -243,6 +243,13 @@ def handle_message(message):
             send(message, broadcast=True)
     # endregion
 
+    # region Changing Video URL
+    elif message["type"] == "change_video_url":
+        if message["secret_key"] == secret_key:
+            url = message["url"]
+            send({"type": "change_video_url", "url": url}, broadcast=True)
+    # endregion
+
     # region Chat Messages
     elif message["type"] == "chat":
         chat_history.append(message)

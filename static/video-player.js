@@ -74,13 +74,16 @@ function HostMessageHandler(event) {
             // Shows the chat box
             document.getElementById("chat-div").style.display = "inline-block";
 
+            // Shows the video controls
+            document.getElementById("video-controls-div").style.display = "inline-block";
+
             // Shows the warning telling the host not to close the tab
             document.getElementById("host-notice").style.display = "initial";
 
             // Shows the buttons allowing the host to kick/promote users
             document.getElementById("host-user-control-buttons").style.display = "initial";
             document.getElementById("host-chat-control-buttons").style.display = "initial";
-            document.getElementById("chat-box").style.height = "65%";
+            document.getElementById("chat-box").style.height = "60%";
             document.getElementById("users-list-child").style.height = "65%";
 
             // Sends data to the server whenever the host pauses/resumes/skips the video
@@ -192,6 +195,10 @@ function GuestMessageHandler(event) {
 
         // Close the websocket connection
         socket.close();
+    }
+    else if (event["type"] == "change_video_url") {
+        console.log("hi");
+        myVideo.src({type: 'video/youtube', src: event["url"]});
     }
     else if (event["type"] == "remove_chat_message") {
         document.getElementById('chat-box').remove(event["message_index"]);
@@ -397,4 +404,14 @@ function KickUser() {
     else {
         alert("You cannot kick yourself!");
     }
+}
+
+function ChangeVideoURL() {
+    var url = document.getElementById("new-url-type").value;
+    myVideo.src({type: 'video/youtube', src: url});
+    socket.send({
+        'type': 'change_video_url',
+        'secret_key': secret_key,
+        'url': url
+    });
 }

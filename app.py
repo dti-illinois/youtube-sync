@@ -229,7 +229,7 @@ def handle_message(message):
     # region User Kick Requests
     elif message["type"] == "kick_user":
         if message["secret_key"] == secret_key:
-            send(message, broadcast=True)
+            send({"type": "kick_user", "user": message["user"]}, broadcast=True)
     # endregion
 
     # region Changing Video URL

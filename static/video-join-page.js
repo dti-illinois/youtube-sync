@@ -13,25 +13,9 @@ function session_begin() {
     if (document.getElementById("host_radio").checked == true) {
         role = 0;
         url = document.getElementById('url_input').value;
+    }
 
-        // Pings the server to send the video URL
-        $.ajax({
-            type: "POST" ,
-            url: "/host-url-send",
-            data: url,
-            success: function(data) {
-                finish_session_begin();
-            },
-            error: function(data) {
-                if (data.responseText != undefined) {
-                    alert("Error: " + data.responseText);
-                }
-            }
-        });
-    }
-    else {
-        finish_session_begin();
-    }
+    finish_session_begin();
 }
 
 function finish_session_begin() {
@@ -46,10 +30,10 @@ function finish_session_begin() {
 
     var url_args = "";
     if (role == 0) {
-        url_args = "&url=" + url;
+        url_args = "&url=" + encodeURIComponent(url);
     }
 
-    window.location = "video-player?username=" + username + "&role=" + role + url_args;
+    window.location = "video-player?username=" + encodeURIComponent(username) + "&role=" + role + url_args;
 }
 
 function initVideo() {

@@ -113,7 +113,7 @@ def video_join_page():
 
 @app.route('/video-player')
 def videojs_websockets_combined():
-    return render_template("video-player.html", video_url=url)
+    return render_template("video-player.html")
 
 
 # This is called when the client pings the server to find out if there is already a host
@@ -130,21 +130,7 @@ def current_host_check():
         return "false"
 
 
-# Sets the URL parameter when the host joins a session
-@app.route('/host-url-send', methods=['POST'])
-def host_url_send():
-    global url
-    host_exists = False
-    for user in users:
-        if user["role"] == "host":
-            host_exists = True
-    if not host_exists:
-        url = request.get_data().decode("UTF-8")
-        print("URL is " + url)
-    return 'OK'
-
-
-# region Websockets Message Handle
+# region Websockets Message Handler
 @socketio.on('message')
 def handle_message(message):
     global users
@@ -181,6 +167,7 @@ def handle_message(message):
                 else:
                     send({"type": "join_request_response", "value": True})
                     send({"type": "chat_history", "data": chat_history})
+                    send({"type": "change_video_url", "url": url})
                     send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
                     users.append({"role": "guest", "username": message["name"]})
                     send({"type": "user_data", "data": users}, broadcast=True)
@@ -209,7 +196,9 @@ def handle_message(message):
                 secret_key = ''.join((random.choice(string.ascii_letters + string.digits) for i in range(25)))
                 send({"type": "host_request_response", "value": True, "secret_key": secret_key})
                 users.append({"role": "host", "username": message["name"]})
+                url = message["url"]
                 send({"type": "user_data", "data": users}, broadcast=True)
+                send({"type": "change_video_url", "url": url}, broadcast=True)
     # endregion
 
     # region Guest Leaving

@@ -5,7 +5,7 @@
     // updatingPlayer - used to prevent infinite loops
     // role - 0 = host, 1 = guest
     // secret_key = secret key used to verify transactions between server and host client
-    var username, myVideo, socket, updatingPlayer, role, secret_key;
+    var username, myVideo, socket, updatingPlayer, role, secret_key, url;
 //#endregion
 
 // Reports disconnection to the server before the tab is fully closed
@@ -41,7 +41,12 @@ function StartSession() {
     document.getElementById("creating-session").style.display = "initial";
 
     // Tells the webserver the host's username
-    socket.send({"type":"join","role":"host","name":username});
+    socket.send({
+        "type": "join",
+        "role": "host",
+        "name": username,
+        "url": url
+    });
 
     // Handle recieving messages from the server
     socket.addEventListener('message', HostMessageHandler);
@@ -49,8 +54,6 @@ function StartSession() {
 
 // Handles messages sent from the server to the host
 function HostMessageHandler(event) {
-    console.log("Recieved message" + JSON.stringify(event));
-
     // If a new guest joined, send them the data of the current state
     if (event["type"] == "guest_joined") {
         SetData();
@@ -169,8 +172,6 @@ function JoinSession() {
 
 // Handles messages sent from the server to the guest
 function GuestMessageHandler(event) {
-    console.log("Recieved message" + JSON.stringify(event));
-
     // If the host left, leave the session
     if (event["type"] == "host_left") {
         // Re-show the join form
@@ -197,7 +198,6 @@ function GuestMessageHandler(event) {
         socket.close();
     }
     else if (event["type"] == "change_video_url") {
-        console.log("hi");
         myVideo.src({type: 'video/youtube', src: event["url"]});
     }
     else if (event["type"] == "remove_chat_message") {
@@ -358,6 +358,12 @@ function initVideo() {
         }
     }
 
+    if (role == 0) {
+        console.log("it worked");
+        url = getParams()["url"];
+        myVideo.src({type: 'video/youtube', src: url});
+    }
+
     session_begin();
 }
 
@@ -407,11 +413,11 @@ function KickUser() {
 }
 
 function ChangeVideoURL() {
-    var url = document.getElementById("new-url-type").value;
-    myVideo.src({type: 'video/youtube', src: url});
+    var newUrl = document.getElementById("new-url-type").value;
+    myVideo.src({type: 'video/youtube', src: newUrl});
     socket.send({
         'type': 'change_video_url',
         'secret_key': secret_key,
-        'url': url
+        'url': newUrl
     });
 }

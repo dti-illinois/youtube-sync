@@ -6,6 +6,10 @@ import json
 import random
 import string
 
+# Used for logging
+import datetime
+import os
+
 # Webserver code
 from flask import (Flask, render_template, request, jsonify)
 
@@ -40,7 +44,13 @@ url = ""
 
 # The secret key to be shared with the host
 secret_key = ""
-#endregion
+
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+# The log file name
+LOG_FILE_NAME = datetime.datetime.now().strftime("./logs/log_%G%m%d_%H%M%S.log")
+# endregion
 
 
 # region Roll Call
@@ -53,7 +63,7 @@ def roll_call():
     roll_users = []
 
     # Log
-    print("Calling roll...")
+    log("Calling roll")
 
     # Sends a message to the clients requesting a roll response
     socketio.send({"type": "roll_call"}, broadcast=True)
@@ -85,6 +95,14 @@ def update_users_from_roll():
     else:
         socketio.send({"type": "user_data", "data": users}, broadcast=True)
 # endregion
+
+
+# Logs data to the console and the log file
+def log(message):
+    log_string = '[' + datetime.datetime.now().strftime("%H:%M:%S") + ']: ' + message + "\n"
+    print(log_string)
+    with open(LOG_FILE_NAME, 'a') as log_file:
+        log_file.write(log_string)
 
 
 # Resets all data to the original state
@@ -139,17 +157,20 @@ def handle_message(message):
     global url
 
     # Log
-    print('Received message: ' + str(message))
+    log('Received message: ' + str(message))
 
     # region Guest Join Requests
     if message["type"] == "join" and message["role"] == "guest":
-        print("Recieved join request")
+        log("Received join request from username " + message["name"])
         if len(message["name"]) > 20:
             send({"type": "join_request_response", "value": False, "reason": "username_too_long"})
+            log("Denied join request: username too long")
         elif "<" in message["name"] or ">" in message["name"] or "(" in message["name"] or ")" in message["name"]:
             send({"type": "join_request_response", "value": False, "reason": "username_special_characters"})
+            log("Denied join request: username contained special characters that are not allowed")
         elif message["name"] == "":
             send({"type": "join_request_response", "value": False, "reason": "username_blank"})
+            log("Denied join request: username was blank")
         else:
             success_joining = True
             for user in users:
@@ -157,6 +178,7 @@ def handle_message(message):
                     success_joining = False
             if success_joining == False:
                 send({"type": "join_request_response", "value": False, "reason": "username_not_unique"})
+                log("Denied join request: username was already taken")
             else:
                 success_joining = False
                 for user in users:
@@ -164,6 +186,7 @@ def handle_message(message):
                         success_joining = True
                 if success_joining == False:
                     send({"type": "join_request_response", "value": False, "reason": "no_host"})
+                    log("Denied join request: there is not a host in this session")
                 else:
                     send({"type": "join_request_response", "value": True})
                     send({"type": "chat_history", "data": chat_history})
@@ -171,20 +194,25 @@ def handle_message(message):
                     send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
                     users.append({"role": "guest", "username": message["name"]})
                     send({"type": "user_data", "data": users}, broadcast=True)
+                    log("Approved join request from username " + message["name"])
     # endregion Join Requests
 
     # region Host Join Requests
     elif message["type"] == "join" and message["role"] == "host":
+        log("Received host request from username " + message["name"])
         host_exists = True
         for user in users:
             if user["role"] == "host":
                 host_exists = False
         if host_exists == False:
             send({"type": "host_request_response", "value": False, "reason": "host_already_exists"})
+            log("Denied host request: there is already a host in this session")
         elif "<" in message["name"] or ">" in message["name"] or "(" in message["name"] or ")" in message["name"]:
             send({"type": "host_request_response", "value": False, "reason": "username_special_characters"})
+            log("Denied host request: username contained disallowed special characters")
         elif len(message["name"]) > 20:
             send({"type": "host_request_response", "value": False, "reason": "username_too_long"})
+            log("Denied host request: username too long")
         else:
             success_joining = True
             for user in users:
@@ -192,6 +220,7 @@ def handle_message(message):
                     success_joining = False
             if success_joining == False:
                 send({"type": "host_request_response", "value": False, "reason": "username_not_unique"})
+                log("Denied host request: username was not unique")
             else:
                 secret_key = ''.join((random.choice(string.ascii_letters + string.digits) for i in range(25)))
                 send({"type": "host_request_response", "value": True, "secret_key": secret_key})
@@ -199,6 +228,7 @@ def handle_message(message):
                 url = message["url"]
                 send({"type": "user_data", "data": users}, broadcast=True)
                 send({"type": "change_video_url", "url": url}, broadcast=True)
+                log("Approved host request from username " + message["name"])
     # endregion
 
     # region Guest Leaving
@@ -207,12 +237,14 @@ def handle_message(message):
             if users[i]["username"] == message["name"]:
                 del users[i]
         send({"type": "user_data", "data": users}, broadcast=True)
+        log("Guest with username " + message["name"] + "left the session")
     # endregion
 
     # region Host Leaving
     elif message["type"] == "leave" and message["role"] == "host":
         reset()
         send({"type": "host_left"}, broadcast=True)
+        log("The host left the session")
     # endregion
 
     # region Host Video Data
@@ -230,6 +262,7 @@ def handle_message(message):
     elif message["type"] == "kick_user":
         if message["secret_key"] == secret_key:
             send({"type": "kick_user", "user": message["user"]}, broadcast=True)
+            log("Kicked user " + message["user"])
     # endregion
 
     # region Changing Video URL
@@ -237,12 +270,14 @@ def handle_message(message):
         if message["secret_key"] == secret_key:
             url = message["url"]
             send({"type": "change_video_url", "url": url}, broadcast=True)
+            log("Changed video URL to " + message["url"])
     # endregion
 
     # region Chat Messages
     elif message["type"] == "chat":
         chat_history.append(message)
         send(message, broadcast=True)
+        log("Received chat message: " + message["message"])
     # endregion
 
     # region Roll Call Responses
@@ -255,18 +290,24 @@ def handle_message(message):
         if message["secret_key"] == secret_key:
             send({"type": "remove_chat_message", "message_index": message["message_index"]}, broadcast=True)
             chat_history.pop(message["message_index"])
+            log("Host removed a chat message")
     # endregion
 # endregion
 
+
 @socketio.on('connect')
 def connection():
+    log("WebSockets client connected")
     send({"type": "connection_status", "value": True})
 
 
 @socketio.on('disconnect')
 def disconnection():
-    print('Client disconnected')
+    log("WebSockets client disconnected")
     roll_call()
+
+
+log("Initializing app...")
 
 
 # Run app

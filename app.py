@@ -121,16 +121,19 @@ def reset():
 
 @app.route('/')
 def index():
+    log("Sending rendered page '/' to user with IP " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     return render_template('index.html')
 
 
 @app.route('/video-join-page')
 def video_join_page():
+    log("Sending rendered page '/video-join-page' to user with IP " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     return render_template("video-join-page.html")
 
 
 @app.route('/video-player')
 def videojs_websockets_combined():
+    log("Sending rendered page '/video-player' to user with IP " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     return render_template("video-player.html")
 
 
@@ -138,6 +141,7 @@ def videojs_websockets_combined():
 # If there isn't one, the client will auto-select the "Host" button
 @app.route('/current-host-check')
 def current_host_check():
+    log("Sending non-rendered page '/current-host-check' to user with IP " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     host_exists = False
     for user in users:
         if user["role"] == "host":

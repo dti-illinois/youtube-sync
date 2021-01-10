@@ -26,7 +26,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 
 # Initialize websockets
-socketio = SocketIO(app, cors_allowed_origins='*')
+sio = SocketIO(app, cors_allowed_origins='*')
 # endregion
 
 # region Define variables
@@ -66,7 +66,7 @@ def roll_call():
     log("Calling roll")
 
     # Sends a message to the clients requesting a roll response
-    socketio.send({"type": "roll_call"}, broadcast=True)
+    sio.send({"type": "roll_call"}, broadcast=True)
 
     # Wait 10 seconds
     t = Timer(10, update_users_from_roll)
@@ -89,11 +89,11 @@ def update_users_from_roll():
     # If no host, reset and send message to clients
     if not found_host:
         reset()
-        socketio.send({"type": "host_left"}, broadcast=True)
+        sio.send({"type": "host_left"}, broadcast=True)
 
     # If there was a host, send updated user data to clients
     else:
-        socketio.send({"type": "user_data", "data": users}, broadcast=True)
+        sio.send({"type": "user_data", "data": users}, broadcast=True)
 # endregion
 
 
@@ -153,19 +153,21 @@ def current_host_check():
 
 
 # region Websockets Message Handler
-@socketio.on('message')
+@sio.on('message')
 def handle_message(message):
     global users
     global chat_history
     global secret_key
     global url
 
+    ip = request.remote_addr
+
     # Log
-    log('Received message: ' + str(message))
+    log('Received message from user with IP address ' + ip + ": " + str(message))
 
     # region Guest Join Requests
     if message["type"] == "join" and message["role"] == "guest":
-        log("Received join request from username " + message["name"])
+        log("Received join request from username " + message["name"] + "with IP address " + ip)
         if len(message["name"]) > 20:
             send({"type": "join_request_response", "value": False, "reason": "username_too_long"})
             log("Denied join request: username too long")
@@ -203,7 +205,7 @@ def handle_message(message):
 
     # region Host Join Requests
     elif message["type"] == "join" and message["role"] == "host":
-        log("Received host request from username " + message["name"])
+        log("Received host request from username " + message["name"] + "with IP address " + ip)
         host_exists = True
         for user in users:
             if user["role"] == "host":
@@ -241,7 +243,7 @@ def handle_message(message):
             if users[i]["username"] == message["name"]:
                 del users[i]
         send({"type": "user_data", "data": users}, broadcast=True)
-        log("Guest with username " + message["name"] + "left the session")
+        log("Guest with username " + message["name"] + "and IP address " + ip + "left the session")
     # endregion
 
     # region Host Leaving
@@ -281,7 +283,7 @@ def handle_message(message):
     elif message["type"] == "chat":
         chat_history.append(message)
         send(message, broadcast=True)
-        log("Received chat message: " + message["message"])
+        log("Received chat message from username "+message["username"]+" and IP address "+ip+": "+message["message"])
     # endregion
 
     # region Roll Call Responses
@@ -299,13 +301,13 @@ def handle_message(message):
 # endregion
 
 
-@socketio.on('connect')
+@sio.on('connect')
 def connection():
     log("WebSockets client connected")
     send({"type": "connection_status", "value": True})
 
 
-@socketio.on('disconnect')
+@sio.on('disconnect')
 def disconnection():
     log("WebSockets client disconnected")
     roll_call()
@@ -316,4 +318,4 @@ log("Initializing app...")
 
 # Run app
 if __name__ == '__main__':
-    socketio.run(app, host='play.dti.illinois.edu', port=443)
+    sio.run(app, host='play.dti.illinois.edu', port=443)

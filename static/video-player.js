@@ -73,7 +73,7 @@ function UpdateChat(event) {
     }
 
     // Adds the message to the chat box
-    document.getElementById("chat-box").innerHTML += ("<br><option" + emblem + " class='username-object' value='" + event["message"] + "'>" + event["message"] + "</option>");
+    document.getElementById("chat-box").innerHTML += ("<br><option" + emblem + " class='username-object'>[" + event["username"] + "] " + event["message"] + "</option>");
 
     // Scrolls to the bottom of the chat
     document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
@@ -138,7 +138,7 @@ function SetData() {
 
 // Sends a chat message
 function sendChatMessage() {
-    socket.send({'type':'chat', 'message': username + ': ' + document.getElementById('chat-type').value, 'role': role});
+    socket.send({'type':'chat', 'username': username, 'message': document.getElementById('chat-type').value, 'role': role});
     document.getElementById('chat-type').value = '';
 }
 

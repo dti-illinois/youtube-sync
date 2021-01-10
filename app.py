@@ -296,7 +296,7 @@ def handle_message(message):
         if message["secret_key"] == secret_key:
             send({"type": "remove_chat_message", "message_index": message["message_index"]}, broadcast=True)
             chat_history.pop(message["message_index"])
-            log("Host removed a chat message")
+            log("Host removed chat message with content: " + message["message_content"])
     # endregion
 # endregion
 

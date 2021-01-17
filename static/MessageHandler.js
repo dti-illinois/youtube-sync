@@ -52,6 +52,9 @@ function HostMessageHandler(event) {
         case "remove_chat_message":
             document.getElementById('chat-box').remove(event["message_index"]);
             break;
+
+        case "promote_user":
+            window.location = "video-player?username=" + username + "&role=1";
     }
 }
 
@@ -118,6 +121,12 @@ function GuestMessageHandler(event) {
                 JoinRequestApproved(event);
             }
             break;
+
+        case "promote_user":
+            if (event["user"] == username) {
+                socket.send({"type":"leave", "role":"guest", "name": username});
+                window.location = "video-player?username=" + username + "&role=0&url=" + encodeURIComponent(myVideo.src());
+            }
     }
 }
 

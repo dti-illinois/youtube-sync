@@ -45,6 +45,8 @@ url = ""
 # The secret key to be shared with the host
 secret_key = ""
 
+changing_host = False
+
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
@@ -58,19 +60,21 @@ LOG_FILE_NAME = datetime.datetime.now().strftime("./logs/log_%G%m%d_%H%M%S.log")
 def roll_call():
     global roll_users
     global users
+    global changing_host
 
-    # Clear roll_users
-    roll_users = []
+    if not changing_host:
+        # Clear roll_users
+        roll_users = []
 
-    # Log
-    log("Calling roll")
+        # Log
+        log("Calling roll")
 
-    # Sends a message to the clients requesting a roll response
-    sio.send({"type": "roll_call"}, broadcast=True)
+        # Sends a message to the clients requesting a roll response
+        sio.send({"type": "roll_call"}, broadcast=True)
 
-    # Wait 10 seconds
-    t = Timer(10, update_users_from_roll)
-    t.start()
+        # Wait 10 seconds
+        rollTimer = Timer(10, update_users_from_roll)
+        rollTimer.start()
 
 
 # Called 10 seconds after client disconnection
@@ -78,6 +82,8 @@ def update_users_from_roll():
     global users
     global roll_users
     global secret_key
+
+    log("Roll call time is up")
 
     found_host = False
 
@@ -87,7 +93,7 @@ def update_users_from_roll():
             found_host = True
 
     # If no host, reset and send message to clients
-    if not found_host:
+    if not found_host and not changing_host:
         reset()
         sio.send({"type": "host_left"}, broadcast=True)
 
@@ -159,6 +165,7 @@ def handle_message(message):
     global chat_history
     global secret_key
     global url
+    global changing_host
 
     ip = request.remote_addr
 
@@ -182,6 +189,10 @@ def handle_message(message):
             for user in users:
                 if user["username"] == message["name"]:
                     success_joining = False
+
+            if changing_host == True:
+                success_joining = True
+
             if success_joining == False:
                 send({"type": "join_request_response", "value": False, "reason": "username_not_unique"})
                 log("Denied join request: username was already taken")
@@ -190,6 +201,10 @@ def handle_message(message):
                 for user in users:
                     if user["role"] == "host":
                         success_joining = True
+
+                if changing_host == True:
+                    success_joining = True
+
                 if success_joining == False:
                     send({"type": "join_request_response", "value": False, "reason": "no_host"})
                     log("Denied join request: there is not a host in this session")
@@ -224,6 +239,10 @@ def handle_message(message):
             for user in users:
                 if user["username"] == message["name"]:
                     success_joining = False
+
+            if changing_host == True:
+                success_joining = True
+
             if success_joining == False:
                 send({"type": "host_request_response", "value": False, "reason": "username_not_unique"})
                 log("Denied host request: username was not unique")
@@ -235,6 +254,7 @@ def handle_message(message):
                 send({"type": "user_data", "data": users}, broadcast=True)
                 send({"type": "change_video_url", "url": url}, broadcast=True)
                 log("Approved host request from username " + message["name"])
+                changing_host = False
     # endregion
 
     # region Guest Leaving
@@ -269,6 +289,20 @@ def handle_message(message):
         if message["secret_key"] == secret_key:
             send({"type": "kick_user", "user": message["user"]}, broadcast=True)
             log("Kicked user " + message["user"])
+    # endregion
+
+    # region Promotion Requests
+    elif message["type"] == "promote_user":
+        if message["secret_key"] == secret_key:
+            changing_host = True
+
+            send({"type": "promote_user", "user": message["user"]}, broadcast=True)
+            log("Promoted user " + message["user"] + " to host")
+
+            for i in range(len(users)):
+                if users[i]["username"] == message["host_username"]:
+                    del users[i]
+            send({"type": "user_data", "data": users}, broadcast=True)
     # endregion
 
     # region Changing Video URL

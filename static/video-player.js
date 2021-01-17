@@ -166,7 +166,23 @@ function KickUser() {
         });
     }
     else {
-        alert("You cannot kick yourself!");
+        alert("Error: You cannot kick yourself");
+    }
+}
+
+function PromoteToHost() {
+    var selectedUser = document.getElementById('users-list-child').options[document.getElementById('users-list-child').selectedIndex].value;
+
+    if (selectedUser != username) {
+        socket.send({
+            'type': 'promote_user',
+            'secret_key': secret_key,
+            'user': selectedUser,
+            'host_username': username
+        });
+    }
+    else {
+        alert("Error: You cannot promote yourself to host");
     }
 }
 

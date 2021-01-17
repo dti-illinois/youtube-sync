@@ -179,3 +179,14 @@ function ChangeVideoURL() {
         'url': newUrl
     });
 }
+
+function RemoveChatMessage() {
+    if (confirm("Are you sure you want to remove the selected chat message?")) {
+        socket.send({
+            'type': 'remove_chat_message',
+            'secret_key': secret_key,
+            'message_index': document.getElementById('chat-box').selectedIndex,
+            'message_content': document.getElementById('chat-box')[document.getElementById('chat-box').selectedIndex].innerHTML
+        });
+    }
+}

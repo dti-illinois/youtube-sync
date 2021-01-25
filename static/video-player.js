@@ -5,7 +5,7 @@
     // updatingPlayer - used to prevent infinite loops
     // role - 0 = host, 1 = guest
     // secret_key = secret key used to verify transactions between server and host client
-    var username, myVideo, socket, updatingPlayer, role, secret_key, url;
+    var username, myVideo, socket, updatingPlayer, role, secret_key, url, initialTimestamp, initialPaused;
 //#endregion
 
 // Reports disconnection to the server before the tab is fully closed
@@ -117,8 +117,10 @@ function initVideo() {
     }
 
     if (role == 0) {
-        console.log("it worked");
         url = getParams()["url"];
+        initialTimestamp = getParams()["PlayerTimestamp"];
+        initialPaused = (getParams()["Paused"] == "true");
+
         myVideo.src({type: 'video/youtube', src: url});
     }
 
@@ -178,7 +180,11 @@ function PromoteToHost() {
             'type': 'promote_user',
             'secret_key': secret_key,
             'user': selectedUser,
-            'host_username': username
+            'host_username': username,
+            'video_state': {
+                'PlayerTimestamp': myVideo.currentTime(),
+                'Paused': myVideo.paused()
+            }
         });
     }
     else {

@@ -296,7 +296,7 @@ def handle_message(message):
         if message["secret_key"] == secret_key:
             changing_host = True
 
-            send({"type": "promote_user", "user": message["user"]}, broadcast=True)
+            send({"type": "promote_user", "user": message["user"], "video_state": message["video_state"]}, broadcast=True)
             log("Promoted user " + message["user"] + " to host")
 
             for i in range(len(users)):

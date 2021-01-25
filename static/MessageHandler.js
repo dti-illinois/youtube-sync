@@ -125,7 +125,7 @@ function GuestMessageHandler(event) {
         case "promote_user":
             if (event["user"] == username) {
                 socket.send({"type":"leave", "role":"guest", "name": username});
-                window.location = "video-player?username=" + username + "&role=0&url=" + encodeURIComponent(myVideo.src());
+                window.location = "video-player?username=" + username + "&role=0&url=" + encodeURIComponent(myVideo.src()) + "&PlayerTimestamp=" + event["video_state"]["PlayerTimestamp"] + "&Paused=" + event["video_state"]["Paused"];
             }
     }
 }
@@ -222,6 +222,18 @@ function HostRequestApproved(event) {
     myVideo.on("play", SetData);
     myVideo.on("pause", SetData);
     myVideo.on("seeked", SetData);
+
+    myVideo.play();
+
+    if (initialPaused != undefined && initialTimestamp != undefined) {
+        if (initialPaused == true) {
+            myVideo.pause();
+        } else {
+            myVideo.play();
+        }
+
+        myVideo.currentTime(initialTimestamp);
+    }
 
    // Sends current data to the server
     SetData();

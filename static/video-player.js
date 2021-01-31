@@ -19,7 +19,7 @@ function ReportDisconnection() {
 // Called when the user clicks the join/start button, this function happens regardless of if they are a host or a guest
 function session_begin() {
     // Connects to websockets
-    socket = io.connect();
+    socket = io.connect("http://127.0.0.1:5000");
 
     // Reports disconnection to the server before the tab is fully closed
     window.addEventListener("beforeunload", ReportDisconnection);

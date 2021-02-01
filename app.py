@@ -353,4 +353,4 @@ log("Initializing app...")
 # Run app
 if __name__ == '__main__':
     # sio.run(app, host='play.dti.illinois.edu', port=443)
-    sio.run(app)
+    sio.run(app, debug=True)

@@ -83,8 +83,26 @@ function UpdateChat(event) {
 function UpdateUserData(event) {
     var userData = event["data"];
 
+    console.log(userData);
+
     // Removes all shown users
     document.getElementById("users-list-child").innerHTML = "";
+
+    for (let sid in userData) {
+        var host_style = "";
+        var suffix = "";
+
+        if (userData[sid]["role"] == "host") {
+            host_style = " style='font-weight: bold;'";
+            suffix += " (Host)";
+        }
+
+        if (userData[sid]["username"] == username) {
+            suffix += " (You)";
+        }
+
+        document.getElementById("users-list-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + userData[sid]["username"] + "'> - " + userData[sid]["username"] + suffix + "</option>");
+    }
 
     // Adds each user back to the list
     userData.forEach(function(element) {

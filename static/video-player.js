@@ -103,20 +103,6 @@ function UpdateUserData(event) {
 
         document.getElementById("users-list-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + userData[sid]["username"] + "'> - " + userData[sid]["username"] + suffix + "</option>");
     }
-
-    // Adds each user back to the list
-    userData.forEach(function(element) {
-        var host_style = "";
-        var suffix = "";
-        if (element["role"] == "host") {
-            host_style = " style='font-weight: bold;'";
-            suffix = " (Host)";
-        }
-        if (element["username"] == username) {
-            suffix += " (You)";
-        }
-        document.getElementById("users-list-child").innerHTML += ("<br><option" + host_style + " class='username-object' value='" + element["username"] + "'> - " + element["username"] + suffix + "</option>");
-    });
 }
 
 // Called on page load

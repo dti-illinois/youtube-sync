@@ -67,11 +67,14 @@ def log(message):
 # Resets all data to the original state
 def reset():
     global users
+    global host_sid
     global chat_history
     global roll_users
     global url
     global secret_key
+
     users = {}
+    host_sid = ""
     chat_history = []
     roll_users = []
     url = ""

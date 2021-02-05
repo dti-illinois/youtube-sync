@@ -242,9 +242,9 @@ def handle_message(message):
             send({"type": "promote_user", "user": message["user"], "video_state": message["video_state"]}, broadcast=True)
             log("Promoted user " + message["user"] + " to host")
 
-            for i in range(len(users)):
-                if users[i]["username"] == message["host_username"]:
-                    del users[i]
+            del users[host_sid]
+            host_sid = ""
+
             send({"type": "user_data", "data": users}, broadcast=True)
     # endregion
 
@@ -284,10 +284,11 @@ def connection():
 def disconnection():
     log("WebSockets client with SID " + request.sid + " disconnected.")
 
-    if (users[request.sid]["role"] == "host"):
-        reset()
-        send({"type": "host_left"}, broadcast=True)
-        log("The host left the session")
+    if users[request.sid]["role"] == "host":
+        if not changing_host:
+            reset()
+            send({"type": "host_left"}, broadcast=True)
+            log("The host left the session")
     else:
         log("Guest with username " + users[request.sid]["username"] + "and SID " + request.sid + " left the session")
         del users[request.sid]

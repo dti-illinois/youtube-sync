@@ -263,11 +263,6 @@ def handle_message(message):
         log("Received chat message from username "+message["username"]+" and IP address "+ip+": "+message["message"])
     # endregion
 
-    # region Roll Call Responses
-    elif message["type"] == "roll_response":
-        roll_users.append({"role": message["role"], "username": message["name"]})
-    # endregion
-
     # region Chat Message Removal
     elif message["type"] == "remove_chat_message":
         if message["secret_key"] == secret_key:

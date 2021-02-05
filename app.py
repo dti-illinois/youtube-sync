@@ -203,6 +203,7 @@ def handle_message(message):
                 log("Denied host request: username was not unique")
             else:
                 secret_key = ''.join((random.choice(string.ascii_letters + string.digits) for i in range(25)))
+                host_sid = request.sid
                 send({"type": "host_request_response", "value": True, "secret_key": secret_key})
                 users[request.sid] = {"role": "host", "username": message["name"]}
                 url = message["url"]

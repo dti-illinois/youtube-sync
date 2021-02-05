@@ -30,8 +30,9 @@ sio = SocketIO(app, cors_allowed_origins='*')
 # endregion
 
 # region Define variables
-# Stores an array of information about each user - their username and their role as a host or a guest
-users = []
+# Stores a dictionary of information about each user - their username and their role as a host or a guest
+users = {}
+host_sid = ""
 
 # Stores the chat history to send to a new user when they join
 chat_history = []
@@ -55,54 +56,6 @@ LOG_FILE_NAME = datetime.datetime.now().strftime("./logs/log_%G%m%d_%H%M%S.log")
 # endregion
 
 
-# region Roll Call
-# Called when a client disconnects
-def roll_call():
-    global roll_users
-    global users
-    global changing_host
-
-    if not changing_host:
-        # Clear roll_users
-        roll_users = []
-
-        # Log
-        log("Calling roll")
-
-        # Sends a message to the clients requesting a roll response
-        sio.send({"type": "roll_call"}, broadcast=True)
-
-        # Wait 10 seconds
-        rollTimer = Timer(10, update_users_from_roll)
-        rollTimer.start()
-
-
-# Called 10 seconds after client disconnection
-def update_users_from_roll():
-    global users
-    global roll_users
-    global secret_key
-
-    log("Roll call time is up")
-
-    found_host = False
-
-    # Iterates over all user responses and looks for a host
-    for user in roll_users:
-        if user["role"] == "host":
-            found_host = True
-
-    # If no host, reset and send message to clients
-    if not found_host and not changing_host:
-        reset()
-        sio.send({"type": "host_left"}, broadcast=True)
-
-    # If there was a host, send updated user data to clients
-    else:
-        sio.send({"type": "user_data", "data": users}, broadcast=True)
-# endregion
-
-
 # Logs data to the console and the log file
 def log(message):
     log_string = '[' + datetime.datetime.now().strftime("%H:%M:%S") + ']: ' + message + "\n"
@@ -118,7 +71,7 @@ def reset():
     global roll_users
     global url
     global secret_key
-    users = []
+    users = {}
     chat_history = []
     roll_users = []
     url = ""
@@ -138,7 +91,7 @@ def video_join_page():
 
 
 @app.route('/video-player')
-def videojs_websockets_combined():
+def video_player():
     log("Sending rendered page '/video-player' to user with IP " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     return render_template("video-player.html")
 
@@ -162,6 +115,7 @@ def current_host_check():
 @sio.on('message')
 def handle_message(message):
     global users
+    global host_sid
     global chat_history
     global secret_key
     global url
@@ -170,7 +124,7 @@ def handle_message(message):
     ip = request.remote_addr
 
     # Log
-    log('Received message from user with IP address ' + ip + ": " + str(message))
+    log('Received message from user with IP address ' + ip + ": " + str(message) + " and SID " + request.sid)
 
     # region Guest Join Requests
     if message["type"] == "join" and message["role"] == "guest":
@@ -187,7 +141,7 @@ def handle_message(message):
         else:
             success_joining = True
             for user in users:
-                if user["username"] == message["name"]:
+                if users[user]["username"] == message["name"]:
                     success_joining = False
 
             if changing_host == True:
@@ -199,7 +153,7 @@ def handle_message(message):
             else:
                 success_joining = False
                 for user in users:
-                    if user["role"] == "host":
+                    if users[user]["role"] == "host":
                         success_joining = True
 
                 if changing_host == True:
@@ -213,19 +167,20 @@ def handle_message(message):
                     send({"type": "chat_history", "data": chat_history})
                     send({"type": "change_video_url", "url": url})
                     send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
-                    users.append({"role": "guest", "username": message["name"]})
+                    users[request.sid] = {"role": "guest", "username": message["name"]}
                     send({"type": "user_data", "data": users}, broadcast=True)
                     log("Approved join request from username " + message["name"])
     # endregion Join Requests
 
     # region Host Join Requests
     elif message["type"] == "join" and message["role"] == "host":
-        log("Received host request from username " + message["name"] + "with IP address " + ip)
+        log("Received host request from username " + message["name"])
+
         host_exists = True
-        for user in users:
-            if user["role"] == "host":
-                host_exists = False
-        if host_exists == False:
+        if host_sid == "":
+            host_exists = False
+
+        if host_exists:
             send({"type": "host_request_response", "value": False, "reason": "host_already_exists"})
             log("Denied host request: there is already a host in this session")
         elif "<" in message["name"] or ">" in message["name"] or "(" in message["name"] or ")" in message["name"]:
@@ -237,7 +192,7 @@ def handle_message(message):
         else:
             success_joining = True
             for user in users:
-                if user["username"] == message["name"]:
+                if users[user]["username"] == message["name"]:
                     success_joining = False
 
             if changing_host == True:
@@ -249,28 +204,12 @@ def handle_message(message):
             else:
                 secret_key = ''.join((random.choice(string.ascii_letters + string.digits) for i in range(25)))
                 send({"type": "host_request_response", "value": True, "secret_key": secret_key})
-                users.append({"role": "host", "username": message["name"]})
+                users[request.sid] = {"role": "host", "username": message["name"]}
                 url = message["url"]
                 send({"type": "user_data", "data": users}, broadcast=True)
                 send({"type": "change_video_url", "url": url}, broadcast=True)
                 log("Approved host request from username " + message["name"])
                 changing_host = False
-    # endregion
-
-    # region Guest Leaving
-    elif message["type"] == "leave" and message["role"] == "guest":
-        for i in range(len(users)):
-            if users[i]["username"] == message["name"]:
-                del users[i]
-        send({"type": "user_data", "data": users}, broadcast=True)
-        log("Guest with username " + message["name"] + "and IP address " + ip + "left the session")
-    # endregion
-
-    # region Host Leaving
-    elif message["type"] == "leave" and message["role"] == "host":
-        reset()
-        send({"type": "host_left"}, broadcast=True)
-        log("The host left the session")
     # endregion
 
     # region Host Video Data
@@ -337,14 +276,23 @@ def handle_message(message):
 
 @sio.on('connect')
 def connection():
-    log("WebSockets client connected")
+    log("WebSockets client with SID " + request.sid + " connected.")
+    users[request.sid] = {"username": "", "role": ""}
     send({"type": "connection_status", "value": True})
 
 
 @sio.on('disconnect')
 def disconnection():
-    log("WebSockets client disconnected")
-    roll_call()
+    log("WebSockets client with SID " + request.sid + " disconnected.")
+
+    if (users[request.sid]["role"] == "host"):
+        reset()
+        send({"type": "host_left"}, broadcast=True)
+        log("The host left the session")
+    else:
+        log("Guest with username " + users[request.sid]["username"] + "and SID " + request.sid + " left the session")
+        del users[request.sid]
+        send({"type": "user_data", "data": users}, broadcast=True)
 
 
 log("Initializing app...")

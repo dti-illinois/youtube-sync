@@ -105,8 +105,8 @@ def video_player():
 def current_host_check():
     log("Sending non-rendered page '/current-host-check' to user with IP " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     host_exists = False
-    for user in users:
-        if user["role"] == "host":
+    for sid in users:
+        if users[sid]["role"] == "host":
             host_exists = True
     if host_exists:
         return "true"

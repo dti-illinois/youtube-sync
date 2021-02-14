@@ -4,8 +4,7 @@
     // socket = the websocket object
     // updatingPlayer - used to prevent infinite loops
     // role - 0 = host, 1 = guest
-    // secret_key = secret key used to verify transactions between server and host client
-    var username, myVideo, socket, updatingPlayer, role, secret_key, url, initialTimestamp, initialPaused;
+    var username, myVideo, socket, updatingPlayer, role, url, initialTimestamp, initialPaused;
 //#endregion
 
 // Reports disconnection to the server before the tab is fully closed
@@ -139,7 +138,7 @@ function SetData() {
         Paused: myVideo.paused()
     });
 
-    socket.send({"type":"host_data","action":"set","data":dataToSet, "secret_key": secret_key});
+    socket.send({"type":"host_data","action":"set","data":dataToSet});
 }
 
 // Sends a chat message
@@ -167,7 +166,6 @@ function KickUser() {
     if (selectedUser != username) {
         socket.send({
             'type': 'kick_user',
-            'secret_key': secret_key,
             'user': selectedUser
         });
     }
@@ -182,7 +180,6 @@ function PromoteToHost() {
     if (selectedUser != username) {
         socket.send({
             'type': 'promote_user',
-            'secret_key': secret_key,
             'user': selectedUser,
             'host_username': username,
             'video_state': {
@@ -201,7 +198,6 @@ function ChangeVideoURL() {
     myVideo.src({type: 'video/youtube', src: newUrl});
     socket.send({
         'type': 'change_video_url',
-        'secret_key': secret_key,
         'url': newUrl
     });
 }
@@ -210,7 +206,6 @@ function RemoveChatMessage() {
     if (confirm("Are you sure you want to remove the selected chat message?")) {
         socket.send({
             'type': 'remove_chat_message',
-            'secret_key': secret_key,
             'message_index': document.getElementById('chat-box').selectedIndex,
             'message_content': document.getElementById('chat-box')[document.getElementById('chat-box').selectedIndex].innerHTML
         });

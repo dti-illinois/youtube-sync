@@ -194,9 +194,6 @@ function JoinRequestDenied(event) {
 
 // Called when a request to host a session was approved
 function HostRequestApproved(event) {
-    // Get secret key used to verify transactions
-    secret_key = event["secret_key"];
-
      // Shows the video player
     document.getElementById("video-container").style.display = "initial";
 

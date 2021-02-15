@@ -116,8 +116,12 @@ def current_host_check():
         return "false"
 
 
-def log_false_host(falseRequest):
-    log("Denying request because user falsely claimed to be the host.", request)
+def CheckIfHost(webRequest):
+    if (webRequest.sid == host_sid):
+        return True
+    else:
+        log("Denying request because user falsely claimed to be the host.", request)
+        return False
 
 
 # region Websockets Message Handler
@@ -222,10 +226,8 @@ def handle_message(message):
 
     # region Host Video Data
     elif message["type"] == "host_data":
-        if (users[request.sid]["role"] == "host"):
+        if (CheckIfHost(request)):
             send({"type": "player_data", "data": message["data"]}, broadcast=True)
-        else:
-            log_false_host(request)
     # endregion
 
     # region Guest Video Data
@@ -235,16 +237,14 @@ def handle_message(message):
 
     # region User Kick Requests
     elif message["type"] == "kick_user":
-        if (users[request.sid]["role"] == "host"):
+        if (CheckIfHost(request)):
             send({"type": "kick_user", "user": message["user"]}, broadcast=True)
             log("Kicked user " + message["user"], request)
-        else:
-            log_false_host(request)
     # endregion
 
     # region Promotion Requests
     elif message["type"] == "promote_user":
-        if (users[request.sid]["role"] == "host"):
+        if (CheckIfHost(request)):
             changing_host = True
 
             send({"type": "promote_user", "user": message["user"], "video_state": message["video_state"]}, broadcast=True)
@@ -254,18 +254,14 @@ def handle_message(message):
             host_sid = ""
 
             send({"type": "user_data", "data": users}, broadcast=True)
-        else:
-            log_false_host(request)
     # endregion
 
     # region Changing Video URL
     elif message["type"] == "change_video_url":
-        if (users[request.sid]["role"] == "host"):
+        if (CheckIfHost(request)):
             url = message["url"]
             send({"type": "change_video_url", "url": url}, broadcast=True)
             log("Changed video URL to " + message["url"], request)
-        else:
-            log_false_host(request)
     # endregion
 
     # region Chat Messages
@@ -277,12 +273,10 @@ def handle_message(message):
 
     # region Chat Message Removal
     elif message["type"] == "remove_chat_message":
-        if (users[request.sid]["role"] == "host"):
+        if (CheckIfHost(request)):
             send({"type": "remove_chat_message", "message_index": message["message_index"]}, broadcast=True)
             chat_history.pop(message["message_index"])
             log("Host removed chat message: " + message["message_content"], request)
-        else:
-            log_false_host(request)
     # endregion
 # endregion
 
@@ -302,7 +296,7 @@ def disconnection():
         if not changing_host:
             reset()
             send({"type": "host_left"}, broadcast=True)
-            log("The host left the session")
+            log("The host left the session", request)
     else:
         log("Guest left the session", request)
         del users[request.sid]

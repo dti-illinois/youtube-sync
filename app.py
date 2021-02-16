@@ -88,7 +88,8 @@ def reset():
 @app.route('/')
 def index():
     log("Sending rendered page '/'", request)
-    return render_template('index.html')
+    return render_template("video-join-page.html")
+    #return render_template('index.html')
 
 
 @app.route('/video-join-page')
@@ -187,7 +188,7 @@ def handle_message(message):
 
             if (usernameValidation["value"] == True):
                 # Alert the user of the success
-                send({"type": "join_request_response", "value": True})
+                send({"type": "guest_request_response", "value": True})
 
                 # Send the user the previous chat history
                 send({"type": "chat_history", "data": chat_history})

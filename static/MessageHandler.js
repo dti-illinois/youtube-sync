@@ -60,8 +60,9 @@ function HostMessageHandler(event) {
 
 // Handles messages sent from the server to the guest
 function GuestMessageHandler(event) {
-    switch(event["type"]) {
+    console.log(event);
 
+    switch(event["type"]) {
         // If the host left, leave the session
         case "host_left":
             HostLeft();
@@ -108,7 +109,7 @@ function GuestMessageHandler(event) {
             break;
 
         // Handles responses from the server about a previously sent join request
-        case "join_request_response":
+        case "guest_request_response":
             // Hides the loading message
             document.getElementById("joining-session").style.display = "none";
 

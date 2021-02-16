@@ -118,12 +118,50 @@ def current_host_check():
         return "false"
 
 
-def CheckIfHost(webRequest):
+# Takes a webRequest object and checks if the SID of the sender matches the SID of the session host
+# If yes, returns true. If no, returns false and makes a report of the infraction in the log file
+def CheckIfHost(webRequest, message):
     if (webRequest.sid == host_sid):
         return True
     else:
-        log("Denying request because user falsely claimed to be the host.", request)
+        log("Received the following request: " + message + "\n\tDenying request because user falsely claimed to be the host.", request)
         return False
+
+
+# Validates the username for special characters, length, and more
+# Returns true/false and logs the reason why requests were denied
+def ValidateUsername(username, role):
+    logMessage = "Received " + role + " request with requested username '" + username + "'. "
+
+    # Verify username is not greater than 20 characters
+    if (len(username) > 20):
+        log(logMessage + "Denied for reason: username too long", request)
+        return { "value": False, "reason": "username_too_long" }
+
+    # Check if username contains disallowed characters
+    elif ("<" in username or ">" in username or "(" in username or ")" in username):
+        log(logMessage + "Denied for reason: username contained special characters that are not allowed", request)
+        return { "value": False, "reason": "username_special_characters" }
+
+    # Check if username is blank
+    elif (username == ""):
+        log(logMessage + "Denied for reason: username was blank", request)
+        return { "value": False, "reason": "username_blank" }
+
+    # Check if username was already taken
+    else:
+        success_joining = True
+        if (not changing_host):
+            for user in users:
+                if users[user]["username"] == username:
+                    success_joining = False
+
+        if (not success_joining):
+            log(logMessage + "Denied for reason: username was already taken", request)
+            return { "value": False, "reason": "username_not_unique" }
+        else:
+            log(logMessage + "Request approved.", request)
+            return { "value": True }
 
 
 # region Websockets Message Handler
@@ -137,116 +175,96 @@ def handle_message(message):
 
     ip = request.remote_addr
 
-    # Log
-    log("Received message: " + str(message), request)
-
     # region Guest Join Requests
     if message["type"] == "join" and message["role"] == "guest":
-        log("Received join request from username " + message["name"] + "with IP address " + ip, request)
-        if (len(message["name"]) > 20):
-            send({"type": "join_request_response", "value": False, "reason": "username_too_long"})
-            log("Denied join request: username too long", request)
-        elif ("<" in message["name"] or ">" in message["name"] or "(" in message["name"] or ")" in message["name"]):
-            send({"type": "join_request_response", "value": False, "reason": "username_special_characters"})
-            log("Denied join request: username contained special characters that are not allowed", request)
-        elif (message["name"] == ""):
-            send({"type": "join_request_response", "value": False, "reason": "username_blank"})
-            log("Denied join request: username was blank", request)
+        if (host_sid == ""):
+            send({"type": "guest_request_response", "value": False, "reason": "no_host"})
+            log("Received join request with requested username '" + message["name"] + "'. Denied for reason: there is not a host in this session", request)
+
+        # Validate username
         else:
-            success_joining = True
-            for user in users:
-                if users[user]["username"] == message["name"]:
-                    success_joining = False
+            usernameValidation = ValidateUsername(message["name"], "guest")
 
-            if (changing_host):
-                success_joining = True
+            if (usernameValidation["value"] == True):
+                # Alert the user of the success
+                send({"type": "join_request_response", "value": True})
 
-            if (not success_joining):
-                send({"type": "join_request_response", "value": False, "reason": "username_not_unique"})
-                log("Denied join request: username was already taken", request)
+                # Send the user the previous chat history
+                send({"type": "chat_history", "data": chat_history})
+
+                # Send the user the video URL
+                send({"type": "change_video_url", "url": url})
+
+                # Alert the host that a new guest has joined - the host will send the current video state to the guest
+                send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
+
+                # Set user data for this new guest
+                users[request.sid] = {"role": "guest", "username": message["name"]}
+
+                # Send the current user data to all clients
+                send({"type": "user_data", "data": users}, broadcast=True)
             else:
-                success_joining = False
-                for user in users:
-                    if users[user]["role"] == "host":
-                        success_joining = True
-
-                if changing_host == True:
-                    success_joining = True
-
-                if success_joining == False:
-                    send({"type": "join_request_response", "value": False, "reason": "no_host"})
-                    log("Denied join request: there is not a host in this session", request)
-                else:
-                    send({"type": "join_request_response", "value": True})
-                    send({"type": "chat_history", "data": chat_history})
-                    send({"type": "change_video_url", "url": url})
-                    send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
-                    users[request.sid] = {"role": "guest", "username": message["name"]}
-                    send({"type": "user_data", "data": users}, broadcast=True)
-                    log("Approved join request from username " + message["name"], request)
+                send({"type": "host_request_response", "value": False, "reason": usernameValidation["reason"]})
     # endregion Join Requests
 
     # region Host Join Requests
     elif message["type"] == "join" and message["role"] == "host":
-        log("Received host request from username " + message["name"], request)
 
-        host_exists = True
-        if host_sid == "":
-            host_exists = False
-
-        if host_exists:
+        # Check if there is already an existing host user
+        if (host_sid != ""):
             send({"type": "host_request_response", "value": False, "reason": "host_already_exists"})
-            log("Denied host request: there is already a host in this session", request)
-        elif "<" in message["name"] or ">" in message["name"] or "(" in message["name"] or ")" in message["name"]:
-            send({"type": "host_request_response", "value": False, "reason": "username_special_characters"})
-            log("Denied host request: username contained disallowed special characters", request)
-        elif len(message["name"]) > 20:
-            send({"type": "host_request_response", "value": False, "reason": "username_too_long"})
-            log("Denied host request: username too long", request)
+            log("Received host request with requested username '" + message["name"] + "'. Denied for reason: there is already a host in this session", request)
+        # Validate username
         else:
-            success_joining = True
-            for user in users:
-                if users[user]["username"] == message["name"]:
-                    success_joining = False
-
-            if (changing_host):
-                success_joining = True
-
-            if (not success_joining):
-                send({"type": "host_request_response", "value": False, "reason": "username_not_unique"})
-                log("Denied host request: username was not unique", request)
-            else:
-                host_sid = request.sid
+            usernameValidation = ValidateUsername(message["name"], "host")
+            if (usernameValidation["value"] == True):
+                # Alert the user of the success
                 send({"type": "host_request_response", "value": True})
+
+                # Save the host's SID
+                host_sid = request.sid
+
+                # Set user data for this new host
                 users[request.sid] = {"role": "host", "username": message["name"]}
+
+                # Save the video URL
                 url = message["url"]
+
+                # Send the host the current user data
                 send({"type": "user_data", "data": users}, broadcast=True)
+
+                # Send the host the video URL
                 send({"type": "change_video_url", "url": url}, broadcast=True)
-                log("Approved host request from username " + message["name"], request)
+
+                # End the 'changing host' state (if applicable)
                 changing_host = False
+            else:
+                send({"type": "host_request_response", "value": False, "reason": usernameValidation["reason"]})
     # endregion
 
     # region Host Video Data
     elif message["type"] == "host_data":
-        if (CheckIfHost(request)):
+        if (CheckIfHost(request, message)):
             send({"type": "player_data", "data": message["data"]}, broadcast=True)
+            log("Received host video data.", request)
     # endregion
 
     # region Guest Video Data
     elif message["type"] == "guest_data":
         send({"type": "guest_data", "action": message["action"], "timestamp": message["timestamp"]}, broadcast=True)
+        log("Received guest video data.", request)
     # endregion
 
     # region User Kick Requests
     elif message["type"] == "kick_user":
-        if (CheckIfHost(request)):
+        if (CheckIfHost(request, message)):
             send({"type": "kick_user", "user": message["user"]}, broadcast=True)
-            log("Kicked user " + message["user"], request)
+            log("The host kicked user: " + message["user"], request)
     # endregion
 
     # region Promotion Requests
     elif message["type"] == "promote_user":
-        if (CheckIfHost(request)):
+        if (CheckIfHost(request, message)):
             changing_host = True
 
             send({"type": "promote_user", "user": message["user"], "video_state": message["video_state"]}, broadcast=True)
@@ -260,7 +278,7 @@ def handle_message(message):
 
     # region Changing Video URL
     elif message["type"] == "change_video_url":
-        if (CheckIfHost(request)):
+        if (CheckIfHost(request, message)):
             url = message["url"]
             send({"type": "change_video_url", "url": url}, broadcast=True)
             log("Changed video URL to " + message["url"], request)
@@ -275,7 +293,7 @@ def handle_message(message):
 
     # region Chat Message Removal
     elif message["type"] == "remove_chat_message":
-        if (CheckIfHost(request)):
+        if (CheckIfHost(request, message)):
             send({"type": "remove_chat_message", "message_index": message["message_index"]}, broadcast=True)
             chat_history.pop(message["message_index"])
             log("Host removed chat message: " + message["message_content"], request)
@@ -305,10 +323,8 @@ def disconnection():
         send({"type": "user_data", "data": users}, broadcast=True)
 
 
-log("Initializing app...")
-
-
 # Run app
 if __name__ == '__main__':
     # sio.run(app, host='play.dti.illinois.edu', port=443)
+    log("Initializing app...")
     sio.run(app, debug=True)

@@ -125,6 +125,15 @@ function initVideo() {
         initialPaused = (getParams()["Paused"] == "true");
 
         myVideo.src({type: 'video/youtube', src: url});
+
+        myVideo.play();
+        myVideo.on("loadedmetadata", function() {
+            myVideo.currentTime(initialTimestamp);
+        });
+
+        if (initialPaused) {
+            myVideo.pause();
+        }
     }
 
     session_begin();

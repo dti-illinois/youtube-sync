@@ -162,9 +162,6 @@ function JoinRequestDenied(event) {
     // Close the websocket
     socket.close();
 
-    // Re-show the form
-    document.getElementById("form").style.display = "initial";
-
     // Show the error message
     if (event["reason"] == "username_not_unique") {
         document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";

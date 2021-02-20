@@ -89,7 +89,6 @@ def reset():
 def index():
     log("Sending rendered page '/'", request)
     return render_template("video-join-page.html")
-    #return render_template('index.html')
 
 
 @app.route('/video-join-page')
@@ -174,11 +173,9 @@ def handle_message(message):
     global url
     global changing_host
 
-    ip = request.remote_addr
-
     # region Guest Join Requests
     if message["type"] == "join" and message["role"] == "guest":
-        if (host_sid == ""):
+        if (host_sid == "" and not changing_host):
             send({"type": "guest_request_response", "value": False, "reason": "no_host"})
             log("Received join request with requested username '" + message["name"] + "'. Denied for reason: there is not a host in this session", request)
 

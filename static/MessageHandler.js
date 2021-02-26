@@ -60,8 +60,6 @@ function HostMessageHandler(event) {
 
 // Handles messages sent from the server to the guest
 function GuestMessageHandler(event) {
-    console.log(event);
-
     switch(event["type"]) {
         // If the host left, leave the session
         case "host_left":

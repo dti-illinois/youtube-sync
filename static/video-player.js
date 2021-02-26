@@ -49,6 +49,8 @@ function StartSession() {
 
     // Handle recieving messages from the server
     socket.addEventListener('message', HostMessageHandler);
+
+    SetData();
 }
 
 // Called when a guest joins a session
@@ -82,8 +84,6 @@ function UpdateChat(event) {
 function UpdateUserData(event) {
     var userData = event["data"];
 
-    console.log(userData);
-
     // Removes all shown users
     document.getElementById("users-list-child").innerHTML = "";
 
@@ -105,7 +105,7 @@ function UpdateUserData(event) {
 }
 
 // Called on page load
-function initVideo() {
+window.onload = function() {
     username = getParams()["username"];
     role = getParams()["role"];
 
@@ -127,13 +127,13 @@ function initVideo() {
         myVideo.src({type: 'video/youtube', src: url});
 
         myVideo.play();
-        myVideo.on("loadedmetadata", function() {
+        setTimeout(function() {
             myVideo.currentTime(initialTimestamp);
-        });
-
-        if (initialPaused) {
-            myVideo.pause();
-        }
+            if (initialPaused) {
+                myVideo.pause();
+            }
+            SetData();
+        }, 2000);
     }
 
     session_begin();

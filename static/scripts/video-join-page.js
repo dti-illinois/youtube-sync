@@ -1,6 +1,8 @@
+const HOST_ROLE = 0;
+const GUEST_ROLE = 1;
+
 // Role of the user.
-// 0 = host, 1 = guest
-var role = 1;
+var role = GUEST_ROLE;
 
 var username, url;
 
@@ -11,7 +13,7 @@ function session_begin() {
 
     // Checks which radio button is selected and makes the user a host if desired
     if (document.getElementById("host_radio").checked == true) {
-        role = 0;
+        role = HOST_ROLE;
         url = document.getElementById('url_input').value;
     }
 
@@ -29,7 +31,7 @@ function finish_session_begin() {
     document.getElementById("error-display").style.display = "none";
 
     var url_args = "";
-    if (role == 0) {
+    if (role == HOST_ROLE) {
         url_args = "&url=" + encodeURIComponent(url);
     }
 
@@ -41,9 +43,9 @@ function initVideo() {
         HostBoxChecked();
     }
 
-    // Prevents the user from putting <, >, (, and ) in the username box
+    // Prevents the user from putting <, >, (, ), and \ in the username box
     document.getElementById("username_input").addEventListener("keypress", function(e) {
-        if (e.which == 60 || e.which == 62 || e.which == 40 || e.which == 41) {
+        if (e.which == 60 || e.which == 62 || e.which == 40 || e.which == 41 || e.which == 92) {
             e.preventDefault();
         }
     });
@@ -74,7 +76,7 @@ function initVideo() {
 function HostBoxChecked() {
     document.getElementById('btnStartSession').innerHTML = 'Create Session';
     document.getElementById('url_input').style.display = 'initial';
-    role = 0;
+    role = HOST_ROLE;
 
     if (document.getElementById('url_input').value == '') {
         document.getElementById('btnStartSession').disabled = true;
@@ -84,7 +86,7 @@ function HostBoxChecked() {
 function GuestBoxChecked() {
     document.getElementById('btnStartSession').innerHTML = 'Join Session';
     document.getElementById('url_input').style.display = 'none';
-    role = 1;
+    role = GUEST_ROLE;
 
     if (document.getElementById('username_input').value != '') {
         document.getElementById('btnStartSession').disabled = false;
@@ -95,7 +97,7 @@ function HandleUsernameInput(box) {
     if (box.value == '') {
         document.getElementById('btnStartSession').disabled = true;
     }
-    else if (document.getElementById('url_input').value != '' || role == 1) {
+    else if (document.getElementById('url_input').value != '' || role == GUEST_ROLE) {
         document.getElementById('btnStartSession').disabled = false;
     }
 }

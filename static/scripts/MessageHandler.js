@@ -46,7 +46,7 @@ function HostMessageHandler(event) {
 
         // Respond to a roll call
         case "roll_call":
-            socket.send({"type":"roll_response","role":"host","name":username});
+            socket.send({"type": "roll_response", "role": HOST_ROLE, "name": username});
             break;
 
         case "remove_chat_message":
@@ -103,7 +103,7 @@ function GuestMessageHandler(event) {
 
         // Respond to a roll call
         case "roll_call":
-            socket.send({"type":"roll_response","role":"guest","name":username});
+            socket.send({"type": "roll_response", "role": GUEST_ROLE, "name": username});
             break;
 
         // Handles responses from the server about a previously sent join request
@@ -123,7 +123,7 @@ function GuestMessageHandler(event) {
 
         case "promote_user":
             if (event["user"] == username) {
-                socket.send({"type":"leave", "role":"guest", "name": username});
+                socket.send({"type":"leave", "role": GUEST_ROLE, "name": username});
                 window.location = "video-player?username=" + username + "&role=0&url=" + encodeURIComponent(myVideo.src()) + "&PlayerTimestamp=" + event["video_state"]["PlayerTimestamp"] + "&Paused=" + event["video_state"]["Paused"];
             }
     }
@@ -276,7 +276,7 @@ function KickSelf() {
     document.getElementById("return_after_error_button").style.display = "initial";
     document.getElementById("users-list").style.display = "none";
     document.getElementById("chat-div").style.display = "none";
-    socket.send({"type":"leave", "role":"guest", "name": username});
+    socket.send({"type":"leave", "role": GUEST_ROLE, "name": username});
     socket.close();
 }
 

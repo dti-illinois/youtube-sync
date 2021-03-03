@@ -6,6 +6,8 @@ from flask import (Flask, render_template, request)
 from flask_socketio import (SocketIO, send, emit)
 
 from logger import log
+
+import json
 # endregion
 
 # region Initialization
@@ -31,6 +33,9 @@ chat_history = []
 url = ""
 
 changing_host = False
+
+HOST_ROLE = 0
+GUEST_ROLE = 1
 # endregion
 
 
@@ -72,7 +77,7 @@ def CurrentHostCheck():
     log("Sending non-rendered page '/current-host-check'", request)
     host_exists = False
     for sid in users:
-        if users[sid]["role"] == "host":
+        if users[sid]["role"] == HOST_ROLE:
             host_exists = True
     if host_exists:
         return "true"
@@ -86,14 +91,18 @@ def CheckIfHost(webRequest, message):
     if (webRequest.sid == host_sid):
         return True
     else:
-        log("Received the following request: " + message + "\n\tDenying request because user falsely claimed to be the host.", request)
+        log("Received the following request: " + json.dumps(message) + "\n\tDenying request because user falsely claimed to be the host.", request)
         return False
 
 
 # Validates the username for special characters, length, and more
 # Returns true/false and logs the reason why requests were denied
 def ValidateUsername(username, role):
-    logMessage = "Received " + role + " request with requested username '" + username + "'. "
+    roleText = "guest"
+    if (role == HOST_ROLE):
+        roleText = "host"
+
+    logMessage = "Received " + roleText + " request with requested username '" + username + "'. "
 
     # Verify username is not greater than 20 characters
     if (len(username) > 20):
@@ -136,14 +145,14 @@ def HandleMessage(message):
     global changing_host
 
     # region Guest Join Requests
-    if message["type"] == "join" and message["role"] == "guest":
+    if message["type"] == "join" and message["role"] == GUEST_ROLE:
         if (host_sid == "" and not changing_host):
             send({"type": "guest_request_response", "value": False, "reason": "no_host"})
             log("Received join request with requested username '" + message["name"] + "'. Denied for reason: there is not a host in this session", request)
 
         # Validate username
         else:
-            usernameValidation = ValidateUsername(message["name"], "guest")
+            usernameValidation = ValidateUsername(message["name"], GUEST_ROLE)
 
             if (usernameValidation["value"] == True):
                 # Alert the user of the success
@@ -159,7 +168,7 @@ def HandleMessage(message):
                 send({"type": "guest_joined", "name": message["name"]}, broadcast=True)
 
                 # Set user data for this new guest
-                users[request.sid] = {"role": "guest", "username": message["name"]}
+                users[request.sid] = {"role": GUEST_ROLE, "username": message["name"]}
 
                 # Send the current user data to all clients
                 send({"type": "user_data", "data": users}, broadcast=True)
@@ -168,7 +177,7 @@ def HandleMessage(message):
     # endregion Join Requests
 
     # region Host Join Requests
-    elif message["type"] == "join" and message["role"] == "host":
+    elif message["type"] == "join" and message["role"] == HOST_ROLE:
 
         # Check if there is already an existing host user
         if (host_sid != ""):
@@ -176,7 +185,7 @@ def HandleMessage(message):
             log("Received host request with requested username '" + message["name"] + "'. Denied for reason: there is already a host in this session", request)
         # Validate username
         else:
-            usernameValidation = ValidateUsername(message["name"], "host")
+            usernameValidation = ValidateUsername(message["name"], HOST_ROLE)
             if (usernameValidation["value"] == True):
                 # Alert the user of the success
                 send({"type": "host_request_response", "value": True})
@@ -185,7 +194,7 @@ def HandleMessage(message):
                 host_sid = request.sid
 
                 # Set user data for this new host
-                users[request.sid] = {"role": "host", "username": message["name"]}
+                users[request.sid] = {"role": HOST_ROLE, "username": message["name"]}
 
                 # Save the video URL
                 url = message["url"]
@@ -272,7 +281,7 @@ def WebSocketsConnect():
 def WebSocketsDisconnect():
     log("WebSockets client disconnected.", request)
 
-    if users[request.sid]["role"] == "host":
+    if users[request.sid]["role"] == HOST_ROLE:
         if not changing_host:
             Reset()
             send({"type": "host_left"}, broadcast=True)

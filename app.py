@@ -20,13 +20,12 @@ sio = SocketIO(app, cors_allowed_origins='*')
 # region Define variables
 # Stores a dictionary of information about each user - their username and their role as a host or a guest
 users = {}
+
+# The SID of the host user
 host_sid = ""
 
 # Stores the chat history to send to a new user when they join
 chat_history = []
-
-# Used when calling roll to keep track of user responses
-roll_users = []
 
 # The URL of the YouTube video
 url = ""
@@ -36,34 +35,32 @@ changing_host = False
 
 
 # Resets all data to the original state
-def reset():
+def Reset():
     global users
     global host_sid
     global chat_history
-    global roll_users
     global url
 
     users = {}
     host_sid = ""
     chat_history = []
-    roll_users = []
     url = ""
 
 
 @app.route('/')
-def index():
+def Index():
     log("Sending rendered page '/'", request)
     return render_template("video-join-page.html")
 
 
 @app.route('/video-join-page')
-def video_join_page():
+def VideoJoinPage():
     log("Sending rendered page '/video-join-page'", request)
     return render_template("video-join-page.html")
 
 
 @app.route('/video-player')
-def video_player():
+def VideoPlayer():
     log("Sending rendered page '/video-player'", request)
     return render_template("video-player.html")
 
@@ -71,7 +68,7 @@ def video_player():
 # This is called when the client pings the server to find out if there is already a host
 # If there isn't one, the client will auto-select the "Host" button
 @app.route('/current-host-check')
-def current_host_check():
+def CurrentHostCheck():
     log("Sending non-rendered page '/current-host-check'", request)
     host_exists = False
     for sid in users:
@@ -131,7 +128,7 @@ def ValidateUsername(username, role):
 
 # region Websockets Message Handler
 @sio.on('message')
-def handle_message(message):
+def HandleMessage(message):
     global users
     global host_sid
     global chat_history
@@ -265,19 +262,19 @@ def handle_message(message):
 
 
 @sio.on('connect')
-def connection():
+def WebSocketsConnect():
     log("WebSockets client connected.", request)
     users[request.sid] = {"username": "", "role": ""}
     send({"type": "connection_status", "value": True})
 
 
 @sio.on('disconnect')
-def disconnection():
+def WebSocketsDisconnect():
     log("WebSockets client disconnected.", request)
 
     if users[request.sid]["role"] == "host":
         if not changing_host:
-            reset()
+            Reset()
             send({"type": "host_left"}, broadcast=True)
             log("The host left the session", request)
     else:

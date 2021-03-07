@@ -42,3 +42,4 @@ dist/
 /appconfigservice/.python-version
 
 exec.sh
+logs/

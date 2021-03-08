@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+    {% extends 'base.html' %}
 
 {% block content %}
 
@@ -12,8 +12,8 @@
 
             <br><br>
 
-            <p id="creating-session" class="hidden"><br><br>Creating session, please wait...<br><br></p>
-            <p id="joining-session" class="hidden"><br><br>Joining session, please wait...<br><br></p>
+            <p id="session-loading" class="hidden"></p>
+            <div id="session-loading-indicator" class="spinner-border text-light hidden" role="status"></div>
             <h2 id="session-ended" class="hidden"></h2>
             <p id="error-display" class="hidden error"></p>
             <br><button class="btn btn-info" style="display: none;" onclick="window.location = 'video-join-page';" id="return_after_error_button">Return to Join Page</button>

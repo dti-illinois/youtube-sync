@@ -24,24 +24,57 @@ window.onload = function() {
         }
     }
 
+    // Connects to websockets
+    socket = io.connect("http://127.0.0.1:5000");
+
+    // Reports disconnection to the server before the tab is fully closed
+    window.addEventListener("beforeunload", ReportDisconnection);
+    window.addEventListener("unload", ReportDisconnection);
+
+    // Shows the loading message
+    document.getElementById("session-loading").style.display = "initial";
+    document.getElementById("session-loading-indicator").style.display = "";
+
+    setTimeout(function() {
+        if (document.getElementById("session-loading").style.display == "initial") {
+            document.getElementById("session-loading").style.color = "red";
+            document.getElementById("session-loading").innerHTML = "<br><br>An error occured. Please try again later.<br><br>";
+            document.getElementById("return_after_error_button").style.display = "initial";
+            document.getElementById("session-loading-indicator").style.display = "none";
+        }
+    }, 10000);
+
+    // If the user is a host
     if (role == HOST_ROLE) {
         url = getParams()["url"];
         initialTimestamp = getParams()["PlayerTimestamp"];
         initialPaused = (getParams()["Paused"] == "true");
 
-        myVideo.src({type: 'video/youtube', src: url});
+        document.getElementById("session-loading").innerHTML = "<br><br>Creating session, please wait...<br><br>";
 
-        myVideo.play();
-        setTimeout(function() {
-            myVideo.currentTime(initialTimestamp);
-            if (initialPaused) {
-                myVideo.pause();
-            }
-            SetData();
-        }, 2000);
+        // Handle receiving messages from the server
+        socket.addEventListener('message', HostMessageHandler);
+
+        // Tells the webserver the host's username
+        socket.send({
+            "type": "join",
+            "role": HOST_ROLE,
+            "name": username,
+            "url": url
+        });
+
+        SetData();
     }
+    // If the user is a guest
+    else {
+        document.getElementById("session-loading").innerHTML = "<br><br>Joining session, please wait...<br><br>";
 
-    session_begin();
+        // Sends a join request to the server
+        socket.send({"type": "join", "role": GUEST_ROLE, "name": username});
+
+        // Handles recieving messages from the server
+        socket.addEventListener('message', GuestMessageHandler);
+    }
 }
 
 // Reports disconnection to the server before the tab is fully closed
@@ -50,56 +83,6 @@ function ReportDisconnection() {
         socket.send({"type":"leave", "role": HOST_ROLE, "name": username});
     else
         socket.send({"type":"leave", "role": GUEST_ROLE, "name": username});
-}
-
-// Called when the user clicks the join/start button, this function happens regardless of if they are a host or a guest
-function session_begin() {
-    // Connects to websockets
-    socket = io.connect("http://127.0.0.1:5000");
-
-    // Reports disconnection to the server before the tab is fully closed
-    window.addEventListener("beforeunload", ReportDisconnection);
-    window.addEventListener("unload", ReportDisconnection);
-
-    // If the user is a host
-    if (role == HOST_ROLE) {
-        StartSession();
-    }
-    // If the user is a guest
-    else {
-        JoinSession();
-    }
-}
-
-// Called when the host creates a new session
-function StartSession() {
-    // Shows the loading message
-    document.getElementById("creating-session").style.display = "initial";
-
-    // Handle receiving messages from the server
-    socket.addEventListener('message', HostMessageHandler);
-
-    // Tells the webserver the host's username
-    socket.send({
-        "type": "join",
-        "role": HOST_ROLE,
-        "name": username,
-        "url": url
-    });
-
-    SetData();
-}
-
-// Called when a guest joins a session
-function JoinSession() {
-    // Shows the loading message
-    document.getElementById("joining-session").style.display = "initial";
-
-    // Sends a join request to the server
-    socket.send({"type": "join", "role": GUEST_ROLE, "name": username});
-
-    // Handles recieving messages from the server
-    socket.addEventListener('message', GuestMessageHandler);
 }
 
 // Called by the guest and host; adds the given message to the chat

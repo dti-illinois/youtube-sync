@@ -9,7 +9,8 @@ function HostMessageHandler(event) {
         // Handles responses from the server about a previously sent host request
         case "host_request_response":
             // Hides the loading message
-            document.getElementById("creating-session").style.display = "none";
+            document.getElementById("session-loading").style.display = "none";
+            document.getElementById("session-loading-indicator").style.display = "none";
 
             // If the request was approved
             if (event["value"] == true) {
@@ -109,7 +110,8 @@ function GuestMessageHandler(event) {
         // Handles responses from the server about a previously sent join request
         case "guest_request_response":
             // Hides the loading message
-            document.getElementById("joining-session").style.display = "none";
+            document.getElementById("session-loading").style.display = "none";
+            document.getElementById("session-loading-indicator").style.display = "none";
 
             // If the request was denied
             if (event["value"] == false) {
@@ -210,6 +212,17 @@ function HostRequestApproved(event) {
     document.getElementById("host-chat-control-buttons").style.display = "initial";
     document.getElementById("chat-box").style.height = "60%";
     document.getElementById("users-list-child").style.height = "65%";
+
+    myVideo.src({type: 'video/youtube', src: url});
+
+    myVideo.play();
+    setTimeout(function() {
+        myVideo.currentTime(initialTimestamp);
+        if (initialPaused) {
+            myVideo.pause();
+        }
+        SetData();
+    }, 2000);
 
     // Sends data to the server whenever the host pauses/resumes/skips the video
     myVideo.on("play", SetData);

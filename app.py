@@ -210,6 +210,11 @@ def CheckIfHost(webRequest, message):
 # Validates the username for special characters, length, and more
 # Returns true/false and logs the reason why requests were denied
 def ValidateUsername(username, role):
+    global changing_host
+    global users
+    global HOST_ROLE
+    global GUEST_ROLE
+
     roleText = "guest"
     if (role == HOST_ROLE):
         roleText = "host"
@@ -395,9 +400,9 @@ def WebSocketsDisconnect():
 
     if users[request.sid]["role"] == HOST_ROLE:
         if not changing_host:
-            Reset()
             send({"type": "host_left"}, broadcast=True)
             log("The host left the session", request)
+            Reset()
     else:
         log("Guest left the session", request)
         del users[request.sid]

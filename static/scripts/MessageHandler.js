@@ -295,9 +295,6 @@ function KickSelf() {
 
 // Called when the host leaves the session - resets the page
 function HostLeft() {
-    // Re-show the join form
-    document.getElementById("form").style.display = "initial";
-
     // Hide the video player
     document.getElementById("video-container").style.display = "none";
 

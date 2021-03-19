@@ -94,32 +94,32 @@ GUEST_ROLE = 1
 
 @login_manager.user_loader
 def load_user(netid):
-     return User.get(netid)
+    return User.get(netid)
 
 
 @app.route('/login')
 def login():
-     session['state'] = rndstr()
-     session['nonce'] = rndstr()
+    session['state'] = rndstr()
+    session['nonce'] = rndstr()
 
-     # setup claim request
-     claims_request = ClaimsRequest(
-          userinfo = Claims(uiucedu_uin={"essential": True})
-     )   
-     args = { 
-          "client_id": client.client_id,
-          "response_type": "code",
-          "scope": app.config["SCOPES"],
-          "nonce": session["nonce"],
-          "redirect_uri": app.config["REDIRECT_URIS"][0],
-          "state":session["state"],
-          "claims":claims_request
-     }   
+    # setup claim request
+    claims_request = ClaimsRequest(
+         userinfo = Claims(uiucedu_uin={"essential": True})
+    )
+    args = {
+         "client_id": client.client_id,
+         "response_type": "code",
+         "scope": app.config["SCOPES"],
+         "nonce": session["nonce"],
+         "redirect_uri": app.config["REDIRECT_URIS"][0],
+         "state":session["state"],
+         "claims":claims_request
+    }
 
-     auth_req = client.construct_AuthorizationRequest(request_args=args)
-     login_url = auth_req.request(client.authorization_endpoint)
+    auth_req = client.construct_AuthorizationRequest(request_args=args)
+    login_url = auth_req.request(client.authorization_endpoint)
 
-     return Redirect(login_url)
+    return Redirect(login_url)
 
 
 @app.route('/callback')

@@ -253,9 +253,6 @@ function HostRequestDenied(event) {
     // Close the websocket
     socket.close();
 
-    // Re-show the form
-    document.getElementById("form").style.display = "initial";
-
     // Show the error message
     if (event["reason"] == "host_already_exists") {
         document.getElementById("error-display").innerHTML = "<br><br>Sorry, somebody is already hosting this session. Please join as a guest or try again later.<br><br>";
@@ -281,7 +278,6 @@ function HostRequestDenied(event) {
 
 // Called when you get kicked
 function KickSelf() {
-    document.getElementById("form").style.display = "initial";
     document.getElementById("video-container").style.display = "none";
     myVideo.pause();
     document.getElementById("session-ended").style.display = "initial";

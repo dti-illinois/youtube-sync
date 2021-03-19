@@ -34,6 +34,7 @@ from flask_login import (
 from user import User
 
 from logger import log
+from validation import ValidateUsername
 
 import json
 # endregion
@@ -207,51 +208,6 @@ def CheckIfHost(webRequest, message):
         return False
 
 
-# Validates the username for special characters, length, and more
-# Returns true/false and logs the reason why requests were denied
-def ValidateUsername(username, role):
-    global changing_host
-    global users
-    global HOST_ROLE
-    global GUEST_ROLE
-
-    roleText = "guest"
-    if (role == HOST_ROLE):
-        roleText = "host"
-
-    logMessage = "Received " + roleText + " request with requested username '" + username + "'. "
-
-    # Verify username is not greater than 20 characters
-    if (len(username) > 20):
-        log(logMessage + "Denied for reason: username too long", request)
-        return { "value": False, "reason": "username_too_long" }
-
-    # Check if username contains disallowed characters
-    elif ("<" in username or ">" in username or "(" in username or ")" in username):
-        log(logMessage + "Denied for reason: username contained special characters that are not allowed", request)
-        return { "value": False, "reason": "username_special_characters" }
-
-    # Check if username is blank
-    elif (username == ""):
-        log(logMessage + "Denied for reason: username was blank", request)
-        return { "value": False, "reason": "username_blank" }
-
-    # Check if username was already taken
-    else:
-        success_joining = True
-        if (not changing_host):
-            for user in users:
-                if users[user]["username"] == username:
-                    success_joining = False
-
-        if (not success_joining):
-            log(logMessage + "Denied for reason: username was already taken", request)
-            return { "value": False, "reason": "username_not_unique" }
-        else:
-            log(logMessage + "Request approved.", request)
-            return { "value": True }
-
-
 # region Websockets Message Handler
 @sio.on('message')
 def HandleMessage(message):
@@ -269,7 +225,7 @@ def HandleMessage(message):
 
         # Validate username
         else:
-            usernameValidation = ValidateUsername(message["name"], GUEST_ROLE)
+            usernameValidation = ValidateUsername(message["name"], GUEST_ROLE, users, changing_host, request)
 
             if (usernameValidation["value"] == True):
                 # Alert the user of the success
@@ -302,7 +258,7 @@ def HandleMessage(message):
             log("Received host request with requested username '" + message["name"] + "'. Denied for reason: there is already a host in this session", request)
         # Validate username
         else:
-            usernameValidation = ValidateUsername(message["name"], HOST_ROLE)
+            usernameValidation = ValidateUsername(message["name"], HOST_ROLE, users, changing_host, request)
             if (usernameValidation["value"] == True):
                 # Alert the user of the success
                 send({"type": "host_request_response", "value": True})

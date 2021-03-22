@@ -7,3 +7,4 @@ As of now, the video player can support up to 4 people watching at the same time
 Future features include websockets functionality to reduce server load and a built-in chat.
 
 Visit the [wiki page](https://github.com/IllinoisTechServicesSRTILab/youtube-sync/wiki) for further documentation of the project.
+

@@ -113,8 +113,8 @@ def login():
          "scope": app.config["SCOPES"],
          "nonce": session["nonce"],
          "redirect_uri": app.config["REDIRECT_URIS"][0],
-         "state":session["state"],
-         "claims":claims_request
+         "state": session["state"],
+         "claims": claims_request
     }
 
     auth_req = client.construct_AuthorizationRequest(request_args=args)

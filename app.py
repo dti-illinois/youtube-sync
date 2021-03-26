@@ -219,6 +219,8 @@ def HandleMessage(message):
 
     # region Guest Join Requests
     if message["type"] == "join" and message["role"] == GUEST_ROLE:
+        print("Received guest request...")
+
         if (host_sid == "" and not changing_host):
             send({"type": "guest_request_response", "value": False, "reason": "no_host"})
             log("Received join request with requested username '" + message["name"] + "'. Denied for reason: there is not a host in this session", request)
@@ -246,12 +248,11 @@ def HandleMessage(message):
                 # Send the current user data to all clients
                 send({"type": "user_data", "data": users}, broadcast=True)
             else:
-                send({"type": "host_request_response", "value": False, "reason": usernameValidation["reason"]})
+                send({"type": "guest_request_response", "value": False, "reason": usernameValidation["reason"]})
     # endregion Join Requests
 
     # region Host Join Requests
     elif message["type"] == "join" and message["role"] == HOST_ROLE:
-
         # Check if there is already an existing host user
         if (host_sid != ""):
             send({"type": "host_request_response", "value": False, "reason": "host_already_exists"})

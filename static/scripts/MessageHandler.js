@@ -19,7 +19,7 @@ function HostMessageHandler(event) {
 
             // If the request was denied
             else {
-                HostRequestDenied(event);
+                RequestDenied(event);
             }
 
             break;
@@ -117,7 +117,7 @@ function GuestMessageHandler(event) {
 
             // If the request was denied
             if (event["value"] == false) {
-                JoinRequestDenied(event);
+                RequestDenied(event);
             }
             // If the request was approved
             else {
@@ -160,36 +160,37 @@ function JoinRequestApproved(event) {
 }
 
 // Called when a request to join the session was denied
-function JoinRequestDenied(event) {
+function RequestDenied(event) {
+    console.log("Reason is: " + event["reason"]);
+
     // Close the websocket
     socket.close();
 
     // Show the error message
     if (event["reason"] == "username_not_unique") {
         document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
     }
     else if (event["reason"] == "no_host") {
         document.getElementById("error-display").innerHTML = "<br><br>There is no host in this session. Please either join as the host or have someone else host the session.<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
     }
     else if (event["reason"] == "username_too_long") {
         document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username must be less than 20 characters.<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
     }
     else if (event["reason"] == "username_special_characters") {
         document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot have the characters <, >, (, or ).<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
     }
     else if (event["reason"] == "username_blank") {
         document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot be blank.<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
     }
+    else if (event["reason"] == "username_spaces") {
+        document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot start or end with a space.<br><br>";
+    }
+    else {
+        document.getElementById("error-display").innerHTML = "<br><br>An error occurred with your username. Please try again later.<br><br>";
+    }
+
+    document.getElementById("error-display").style.display = "initial";
+    document.getElementById("return_after_error_button").style.display = "initial";
 }
 
 // Called when a request to host a session was approved
@@ -248,34 +249,6 @@ function HostRequestApproved(event) {
 
     // Sends data to the server every 10 seconds
     var intervalID = window.setInterval(SetData, 10000);
-}
-
-// Called when a request to host a session was denied
-function HostRequestDenied(event) {
-    // Close the websocket
-    socket.close();
-
-    // Show the error message
-    if (event["reason"] == "host_already_exists") {
-        document.getElementById("error-display").innerHTML = "<br><br>Sorry, somebody is already hosting this session. Please join as a guest or try again later.<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
-    }
-    else if (event["reason"] == "username_not_unique") {
-        document.getElementById("error-display").innerHTML = "<br><br>Sorry, that username is already taken.<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
-    }
-    else if (event["reason"] == "username_special_characters") {
-        document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username cannot have the characters <, >, (, or ).<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
-    }
-    else if (event["reason"] == "username_too_long") {
-        document.getElementById("error-display").innerHTML = "<br><br>Sorry, your username must be less than 25 characters.<br><br>";
-        document.getElementById("error-display").style.display = "initial";
-        document.getElementById("return_after_error_button").style.display = "initial";
-    }
 }
 
 // Called when you get kicked

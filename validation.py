@@ -20,6 +20,11 @@ def ValidateUsername(username, role, users, changing_host, request):
         log(logMessage + "Denied for reason: username too long", request)
         return { "value": False, "reason": "username_too_long" }
 
+    # Disallow trailing or preceding spaces in a username
+    elif (username.startswith(" ") or username.endswith(" ")):
+        log(logMessage + "Denied for reason: username cannot start or end with a space", request)
+        return {"value": False, "reason": "username_spaces"}
+
     # Check if username contains disallowed characters
     elif ("<" in username or ">" in username or "(" in username or ")" in username or "‏" in username):
         log(logMessage + "Denied for reason: username contained special characters that are not allowed", request)

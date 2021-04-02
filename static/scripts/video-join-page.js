@@ -48,6 +48,9 @@ function initVideo() {
         if (e.which == 60 || e.which == 62 || e.which == 40 || e.which == 41 || e.which == 92) {
             e.preventDefault();
         }
+        else if (document.getElementById("username_input").value.length == 0 && e.which == 32) {
+            e.preventDefault();
+        }
     });
 
 

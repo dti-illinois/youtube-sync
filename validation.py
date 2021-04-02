@@ -21,7 +21,7 @@ def ValidateUsername(username, role, users, changing_host, request):
         return { "value": False, "reason": "username_too_long" }
 
     # Check if username contains disallowed characters
-    elif ("<" in username or ">" in username or "(" in username or ")" in username):
+    elif ("<" in username or ">" in username or "(" in username or ")" in username or "‏" in username):
         log(logMessage + "Denied for reason: username contained special characters that are not allowed", request)
         return { "value": False, "reason": "username_special_characters" }
 

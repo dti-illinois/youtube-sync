@@ -1,7 +1,7 @@
 Flask==1.1.2
 Flask-Login==0.5.0
 Flask-SocketIO==5.0.1
-oic==1.2.0
+oic==1.2.1
 python-decouple==3.3
 requests==2.22.0
 python-dotenv==0.10.3

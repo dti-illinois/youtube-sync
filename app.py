@@ -11,7 +11,7 @@ from flask import (
 )
 
 # Flask websockets
-from flask_socketio import (SocketIO, send, emit)
+from flask_socketio import (SocketIO, send, emit, disconnect)
 
 # Shibboleth OIDC login
 from oic import rndstr
@@ -302,6 +302,15 @@ def HandleMessage(message):
     elif message["type"] == "kick_user":
         if (CheckIfHost(request, message)):
             send({"type": "kick_user", "user": message["user"]}, broadcast=True)
+
+            kick_sid = ""
+            for sid, user in users.items():
+                if (user["username"] == message["user"]):
+                    kick_sid = sid
+
+            if (kick_sid != ""):
+                disconnect(sid)
+
             log("The host kicked user: " + message["user"], request)
     # endregion
 

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <script>
+        function initVideo() {
+            console.log("Initializing video...");
+        }
+
+        var socket = io.connect("http://127.0.0.1:5000");
+        socket.on('connect', function() {
+            socket.send(
+                {
+                    "hello": "world"
+                }
+            );
+        });
+    </script>
+
+    <h1>Hello, world!</h1>
+{% endblock %}

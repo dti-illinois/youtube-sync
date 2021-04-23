@@ -7,7 +7,14 @@ from flask import (
     url_for,
     Flask
 )
-from flask_socketio import (SocketIO, send, emit, disconnect)
+from flask_socketio import (
+    SocketIO,
+    send,
+    emit,
+    disconnect,
+    join_room,
+    leave_room
+)
 import json
 
 app = Flask(__name__)
@@ -22,6 +29,8 @@ def index():
 @sio.on('connect')
 def sio_connect():
     print("Websockets user connected")
+    print("Query data is: " + request.args.get("room"))
+    join_room(request.args.get("room"))
 
 
 @sio.on('disconnect')

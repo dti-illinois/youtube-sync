@@ -131,6 +131,16 @@ def index():
         return render_template("index.html")
     else:
         return redirect(url_for("login"))
+
+
+@app.route('/play/<session_id>')
+def video(session_id):
+    if current_user.is_authenticated:
+        user = current_user.id
+        log("Sending rendered page '/'", request)
+        return render_template("index.html", sessionID=session_id)
+    else:
+        return redirect(url_for("login"))
  
 
 @app.route('/logout')

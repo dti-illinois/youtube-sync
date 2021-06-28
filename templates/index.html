@@ -1,6 +1,47 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <script>
+        var sessionID = "{{ sessionID }}";
+
+        function initVideo() {
+            var homeDiv = document.getElementById("home-div");
+            var joinDiv = document.getElementById("join-div");
+
+            if (sessionID.length == 5) {
+                // server should be pinged also
+                joinDiv.style.display = "initial";
+            } else {
+                homeDiv.style.display = "initial";
+            }
+        }
+    </script>
+
+    <style>
+        #home-div, #join-div {
+            display: none;
+        }
+    </style>
+
     <h1>Welcome to Youtube-Sync!</h1>
-    <p>Video id is: {{sessionID}}</p>
+
+    <div id="home-div">
+        <h3>Host a Session</h3>
+        <input type="text" id="hostName" placeholder="Your Name" />
+        <input type="text" id="videoURL" placeholder="YouTube Video URL" /><br>
+        <button type="button" class="btn btn-primary">Create Session</button>
+
+        <br><br>
+
+        <h3>Join a Session</h3>
+        <input type="text" id="guestHomeName" placeholder="Your Name" />
+        <input type="text" id="sessionID" placeholder="Session ID" /><br>
+        <button type="button" class="btn btn-primary">Join Session</button>
+    </div>
+
+    <div id="join-div">
+        <h3>Join Video Session {{ sessionID }}</h3>
+        <input type="text" id="guestJoinName" placeholder="Your Name" /><br>
+        <button type="button" class="btn btn-primary">Join Session</button>
+    </div>
 {% endblock %}

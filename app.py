@@ -123,6 +123,11 @@ def callback():
 # endregion
 
 
+def ValidateSessionID(sessionID):
+    # TODO: proper validation
+    return (len(sessionID) == 5)
+
+
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -137,8 +142,11 @@ def index():
 def video(session_id):
     if current_user.is_authenticated:
         user = current_user.id
-        log("Sending rendered page '/'", request)
-        return render_template("index.html", sessionID=session_id)
+        log("Sending rendered page '/play/" + session_id + "'", request)
+        if (ValidateSessionID(session_id) == True):
+            return render_template("index.html", sessionID=session_id)
+        else:
+            return render_template("index.html")
     else:
         return redirect(url_for("login"))
  

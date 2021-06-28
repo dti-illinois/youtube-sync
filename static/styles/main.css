@@ -5,193 +5,38 @@
 
 body {
     text-align: center;
-    font-family: Roboto;
-    display: block;
-    background-image: url('../images/lecture-hall.jpg');
-    background-size: cover;
-    color: white;
+    padding-top: 25px;
+}
+
+.video-js {
+    width: 75vw;
+    height: 75vh;
+
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#join-div {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
     height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
 }
 
-.body-parent {
-    display: block;
-    text-align: center;
-}
-
-.body-container {
-    padding-top: 100px;
-    text-align: center;
-    color: white;
-    display: inline-block;
-}
-
-@media only screen and (min-width: 1301px) {
-    .body-container {
-        width: 50vw;
-    }
-
-    #chat-box {
-        width: 100%;
-    }
-
-    #chat-type {
-        width: 82%;
-    }
-
-    #chat-div, #users-list, #video-controls-div {
-        width: 550px;
-        height: 300px;
-    }
-
-    .responsive-br {
-        display: none;
-    }
-
-    .video-child {
-
-    }
-
-    #my-video {
-        width: 75vw;
-        height: 56vh;
-    }
-}
-
-@media only screen and (max-width: 1300px) {
-    .body-container {
-        width: 90vw;
-    }
-
-    #chat-box {
-        width: 100%;
-    }
-
-    #chat-type {
-        width: 100%;
-    }
-
-    #chat-div, #video-controls-div {
-        width: 90vw;
-        height: 350px;
-    }
-
-    .responsive-br {
-        display: initial;
-    }
-
-    #users-list {
-        width: 90vw;
-    }
-
-    #my-video {
-        width: 90vw;
-        height: 68vh;
-    }
-}
-
-.video-parent {
-    text-align: center;
-    display: block;
-}
-
-.video-child {
-    display: inline-block;
-}
-
-.leftalign {
-    text-align: left;
-}
-
-h1, h3 {
-    text-align: center;
-}
-
-a {
-    color: white !important;
-    text-decoration: underline !important;
-}
-
-a:hover {
-    color: lightblue !important;
-}
-
-#users-list-child {
-    padding: 10px;
-    width: 100%;
-    height: 90%;
-}
-
-#users-list, #chat-div, #video-controls-div {
-    display: none;
+#join-child {
     background-color: white;
-    border: 2px solid black;
-    border-radius: 7px;
-    color: black;
-    padding: 25px 45px 25px 25px;
-    text-align: left;
-}
-#chat-box {
-    padding: 10px;
-    height: 75%;
+    margin: 15% auto;
+    padding: 25px;
+    border: 1px solid black;
+    width: 500px;
+    height: 350px;
 }
 
-.username-object {
-    padding-left: 5px;
-}
-
-#old-links {
-    display: none;
-}
-
-table, tr {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-#username_input {
-    width: 200px;
-}
-
-#url_input {
-    width: 380px;
-}
-
-#username_input, #url_input {
-    text-align: center;
-    display: inline-block;
-}
-
-.hidden {
-    display: none;
-}
-
-.error {
-    color: red;
-}
-
-#chat-type {
-    margin-right: 8px;
-}
-
-.centeralign {
-    text-align: center;
-}
-
-.block {
-    display: block;
-}
-
-.div-box-heading {
-    margin: 0;
-    text-align: center;
-}
-
-#users-list-table {
-    display: inline-block;
-    max-width: 90vw;
-}
-
-#new-url-type {
-    width: 100%;
-    margin: 5px 0;
+#join-content {
+    padding-top: 22%;
 }

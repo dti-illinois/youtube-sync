@@ -7,18 +7,18 @@
         function initVideo() {
             var homeDiv = document.getElementById("home-div");
             var joinDiv = document.getElementById("join-div");
+            var videoDiv = document.getElementById("video-div");
 
             if (sessionID.length == 5) {
-                // server should be pinged also
-                joinDiv.style.display = "initial";
+                //joinDiv.style.display = "initial";
             } else {
-                homeDiv.style.display = "initial";
+                //homeDiv.style.display = "initial";
             }
         }
     </script>
 
     <style>
-        #home-div, #join-div {
+        #home-div {
             display: none;
         }
     </style>
@@ -40,8 +40,37 @@
     </div>
 
     <div id="join-div">
-        <h3>Join Video Session {{ sessionID }}</h3>
-        <input type="text" id="guestJoinName" placeholder="Your Name" /><br>
-        <button type="button" class="btn btn-primary">Join Session</button>
+        <div id="join-child">
+            <div id="join-content">
+                <h3>Join Video Session {{ sessionID }}</h3>
+                <input type="text" id="guestJoinName" placeholder="Your Name" /><br>
+                <button type="button" class="btn btn-primary">Join Session</button>
+            </div>
+        </div>
+    </div>
+
+    <br><br>
+
+    <div id="video-div">
+        <video
+            id="video-js"
+            class="video-js"
+            controls
+            autoplay
+            preload="auto"
+            poster="MY_VIDEO_POSTER.jpg"
+            data-setup='{
+                "techOrder": ["youtube"],
+                "sources": [{
+                    "type": "video/youtube",
+                    "src": ""
+                }]
+            }'
+            >
+                <p class="vjs-no-js">
+                    To view this video please enable JavaScript, and consider upgrading to a web browser that
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                </p>
+        </video>
     </div>
 {% endblock %}

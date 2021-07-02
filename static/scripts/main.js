@@ -44,6 +44,9 @@ function CreateSession() {
     }
     else {
         document.getElementById("createSessionSpinner").style.display = "initial";
+        document.getElementById("createSession-username").disabled = true;
+        document.getElementById("createSession-videoURL").disabled = true;
+        document.getElementById("createSession-button").disabled = true;
     }
 
     //$('#modalCreateSession').hide();

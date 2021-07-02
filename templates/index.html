@@ -31,13 +31,13 @@
               <p class="small-text">If you want to join a session instead, use the link sent to you by the session host.</p>
               <p class="error-message" id="createSession-errorMessage"></p>
 
-              <input type="text" id="createSession-username" placeholder="Your Name" class="form-control" />
-              <input type="text" id="createSession-videoURL" placeholder="YouTube Video URL" class="form-control" />
+              <input type="text" id="createSession-username" placeholder="Your Name" class="form-control" value="Nick" />
+              <input type="text" id="createSession-videoURL" placeholder="YouTube Video URL" class="form-control" value="https://www.youtube.com/watch?v=LXb3EKWsInQ" />
           </div>
           <div class="modal-footer">
               <div class="spinner-border" id="createSessionSpinner"></div>
 
-            <button type="button" class="btn btn-primary" onclick="CreateSession();">Create Session</button>
+            <button type="button" class="btn btn-primary" onclick="CreateSession();" id="createSession-button">Create Session</button>
           </div>
         </div>
       </div>

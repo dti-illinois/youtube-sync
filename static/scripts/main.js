@@ -1,4 +1,10 @@
+var socket, videoJS, videoURL;
+var HOST_ROLE = 0;
+var GUEST_ROLE = 1;
+
 function initVideo() {
+    videoJS = videojs('video-js');
+
     if (invalidURL) {
         $('#modalInvalidURL').modal({backdrop: 'static', keyboard: false});
     }
@@ -47,10 +53,17 @@ function CreateSession() {
         document.getElementById("createSession-username").disabled = true;
         document.getElementById("createSession-videoURL").disabled = true;
         document.getElementById("createSession-button").disabled = true;
-    }
+        videoURL = url;
 
-    //$('#modalCreateSession').hide();
-    //$('.modal-backdrop').hide();
+         socket = io.connect("http://127.0.0.1:5000");
+         socket.addEventListener('message', HostMessageHandler);
+         socket.send({
+             "type": "join_request",
+             "role": HOST_ROLE,
+             "username": name,
+             "url": url
+         });
+    }
 }
 
 function JoinSession() {

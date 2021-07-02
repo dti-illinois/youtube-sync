@@ -122,6 +122,9 @@ def callback():
     return redirect(url_for("index"))
 # endregion
 
+HOST_ROLE = 0
+GUEST_ROLE = 1
+
 
 def ValidateSessionID(sessionID):
     # TODO: proper validation
@@ -181,12 +184,19 @@ def logout():
 @sio.on('connect')
 def WebSocketsConnect():
     log("WebSockets client connected.", request)
-    send({"type": "connection_status", "value": True})
 
 
 @sio.on('disconnect')
 def WebSocketsDisconnect():
     log("WebSockets client disconnected.", request)
+
+
+@sio.on('message')
+def HandleMessage(message):
+    log("Received websockets message: " + str(message))
+
+    if (message["type"] == "join_request" and message["role"] == HOST_ROLE):
+        send({"type": "host_request_response", "value": True})
 
 
 # Run app

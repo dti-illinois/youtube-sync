@@ -5,14 +5,11 @@
         var sessionID = "{{ sessionID }}";
 
         function initVideo() {
-            var homeDiv = document.getElementById("home-div");
-            var joinDiv = document.getElementById("join-div");
-            var videoDiv = document.getElementById("video-div");
-
-            if (sessionID.length == 5) {
-                //joinDiv.style.display = "initial";
-            } else {
-                //homeDiv.style.display = "initial";
+            if (sessionID != "") {
+                $('#modalJoinSession').modal({backdrop: 'static', keyboard: false});
+            }
+            else {
+                $('#modalHomepage').modal({backdrop: 'static', keyboard: false});
             }
         }
     </script>
@@ -25,28 +22,48 @@
 
     <h1>Welcome to Youtube-Sync!</h1>
 
-    <div id="home-div">
-        <h3>Host a Session</h3>
-        <input type="text" id="hostName" placeholder="Your Name" />
-        <input type="text" id="videoURL" placeholder="YouTube Video URL" /><br>
-        <button type="button" class="btn btn-primary">Create Session</button>
-
-        <br><br>
-
-        <h3>Join a Session</h3>
-        <input type="text" id="guestHomeName" placeholder="Your Name" />
-        <input type="text" id="sessionID" placeholder="Session ID" /><br>
-        <button type="button" class="btn btn-primary">Join Session</button>
+    <div class="modal fade" id="modalHomepage" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Join or Create a Session</h5>
+          </div>
+          <div class="modal-body">
+            <table class="homepageTable">
+                <tr>
+                    <td>
+                        <b>Join an Existing Session</b>
+                        <input type="text" id="homepageJoinSession-username" placeholder="Your Name" class="form-control" />
+                        <input type="text" id="homepageJoinSession-sessionID" placeholder="Session Code" class="form-control" />
+                        <button type="button" class="btn btn-primary">Join Session</button>
+                    </td>
+                    <td>
+                        <b>Create a New Session</b>
+                        <input type="text" id="homepageCreateSession-username" placeholder="Your Name" class="form-control" />
+                        <input type="text" id="createSession-URL" placeholder="YouTube Video URL" class="form-control" />
+                        <button type="button" class="btn btn-primary">Create Session</button>
+                    </td>
+                </tr>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="join-div">
-        <div id="join-child">
-            <div id="join-content">
-                <h3>Join Video Session {{ sessionID }}</h3>
-                <input type="text" id="guestJoinName" placeholder="Your Name" /><br>
-                <button type="button" class="btn btn-primary">Join Session</button>
-            </div>
+    <div class="modal fade" id="modalJoinSession" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Join Session {{ sessionID }}</h5>
+          </div>
+          <div class="modal-body">
+            <input type="text" id="joinSession-username" placeholder="Your Name" class="form-control" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Join Session</button>
+          </div>
         </div>
+      </div>
     </div>
 
     <br><br>

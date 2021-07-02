@@ -14,8 +14,8 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
         <script src="{{ url_for('static', filename='scripts/VideoJS-Youtube.js') }}"></script>
 
-        <link rel="stylesheet" href="static/styles/main.css" />
-        <link rel="stylesheet" href="static/styles/mobile.css" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/mobile.css') }}" />
     </head>
 
     <body onload="initVideo()">

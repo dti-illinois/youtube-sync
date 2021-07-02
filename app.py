@@ -133,7 +133,27 @@ def index():
     if current_user.is_authenticated:
         user = current_user.id
         log("Sending rendered page '/'", request)
-        return render_template("index.html")
+        return render_template("index.html", invalidURL=False)
+    else:
+        return redirect(url_for("login"))
+
+
+@app.route('/play')
+def play():
+    if current_user.is_authenticated:
+        user = current_user.id
+        log("Sending rendered page '/play'", request)
+        return render_template("index.html", invalidURL=False)
+    else:
+        return redirect(url_for("login"))
+
+
+@app.route('/play/')
+def play2():
+    if current_user.is_authenticated:
+        user = current_user.id
+        log("Sending rendered page '/play/'", request)
+        return render_template("index.html", invalidURL=False)
     else:
         return redirect(url_for("login"))
 
@@ -144,9 +164,9 @@ def video(session_id):
         user = current_user.id
         log("Sending rendered page '/play/" + session_id + "'", request)
         if (ValidateSessionID(session_id) == True):
-            return render_template("index.html", sessionID=session_id)
+            return render_template("index.html", sessionID=session_id, invalidURL=False)
         else:
-            return render_template("index.html")
+            return render_template("index.html", invalidURL=True)
     else:
         return redirect(url_for("login"))
  

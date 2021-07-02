@@ -8,6 +8,10 @@ body {
     padding-top: 25px;
 }
 
+.small-text {
+    font-size: 11px;
+}
+
 .video-js {
     width: 75vw;
     height: 75vh;
@@ -16,23 +20,19 @@ body {
     margin-right: auto;
 }
 
-.homepageTable {
-    width: 100%;
-    table-layout: fixed;
-}
-
-.homepageTable td {
-    text-align: left;
-}
-
-.homepageTable td * {
+.form-control {
     margin-bottom: 5px;
 }
 
-.homepageTable td:first-child {
-    padding-right: 15px;
+.modal-body {
+    text-align: left;
 }
 
-.homepageTable td:last-child {
-    padding-left: 15px;
+#createSessionSpinner {
+    display: none;
+}
+
+.error-message {
+    display: none;
+    color: red;
 }

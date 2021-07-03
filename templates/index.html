@@ -31,8 +31,8 @@
               <p class="small-text">If you want to join a session instead, use the link sent to you by the session host.</p>
               <p class="error-message" id="createSession-errorMessage"></p>
 
-              <input type="text" id="createSession-username" placeholder="Your Name" class="form-control" value="Nick" />
-              <input type="text" id="createSession-videoURL" placeholder="YouTube Video URL" class="form-control" value="https://www.youtube.com/watch?v=N1-Jmq7BLFE" />
+              <input type="text" id="createSession-username" placeholder="Your Name" class="form-control" value="Nick" onkeypress="SubmitOnEnter(event, 'createSession-button');" />
+              <input type="text" id="createSession-videoURL" placeholder="YouTube Video URL" class="form-control" value="https://www.youtube.com/watch?v=N1-Jmq7BLFE"  onkeypress="SubmitOnEnter(event, 'createSession-button');" />
           </div>
           <div class="modal-footer">
               <div class="spinner-border" id="createSessionSpinner"></div>

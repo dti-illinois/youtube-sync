@@ -33,14 +33,11 @@ function CreateSession() {
         errors += "<br> - Video link is not a valid YouTube URL";
         document.getElementById("createSession-videoURL").classList.add("is-invalid");
     }
-    if (!(new RegExp("^[a-zA-Z0-9_.-]*$", "g").test(name))) {
+
+    var usernameValidity = ValidateUsername(name);
+    if (usernameValidity["isValid"] != true) {
         encounteredErrors = true;
-        errors += "<br> - Username contains invalid characters";
-        document.getElementById("createSession-username").classList.add("is-invalid");
-    }
-    if (name.length < 1 || name.length > 20) {
-        encounteredErrors = true;
-        errors += "<br> - Username must be between 1 and 20 characters long";
+        errors += usernameValidity["errors"];
         document.getElementById("createSession-username").classList.add("is-invalid");
     }
 
@@ -66,7 +63,30 @@ function CreateSession() {
     }
 }
 
+function ValidateUsername(username) {
+    var isValid = true;
+    var errors = "";
+
+    if (!(new RegExp("^[a-zA-Z0-9_.-]*$", "g").test(username))) {
+        isValid = false;
+        errors += "<br> - Username contains invalid characters";
+    }
+
+    if (username.length < 1 || username.length > 20) {
+        isValid = false;
+        errors += "<br> - Username must be between 1 and 20 characters long";
+    }
+
+    return { "isValid": isValid, "errors": errors };
+}
+
 function JoinSession() {
     $('#modalJoinSession').hide();
     $('.modal-backdrop').hide();
+}
+
+function SubmitOnEnter(e, object) {
+    if (e.which == 13) {
+        document.getElementById(object).click();
+    }
 }

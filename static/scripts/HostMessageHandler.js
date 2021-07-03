@@ -7,6 +7,7 @@ function HostMessageHandler(message) {
             $('#modalCreateSession').hide();
             $('.modal-backdrop').hide();
             videoJS.src({type: 'video/youtube', src: videoURL});
+            document.getElementById("sessionLink").value = "http://127.0.0.1:5000/play/" + message["session_code"];
         }
         // Request denied
         else {

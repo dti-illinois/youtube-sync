@@ -34,7 +34,8 @@ from flask_login import (
 from user import User
 
 from logger import log
-from validation import ValidateUsername
+import random
+import string
 
 import json
 # endregion
@@ -122,15 +123,15 @@ def callback():
     return redirect(url_for("index"))
 # endregion
 
+# region Variables
 HOST_ROLE = 0
 GUEST_ROLE = 1
 
-
-def ValidateSessionID(sessionID):
-    # TODO: proper validation
-    return (len(sessionID) == 5)
+sessions = {}
+# endregion
 
 
+# region Basic routing
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -179,8 +180,10 @@ def video(session_id):
 def logout():
     logout_user()
     return redirect(app.config["ISSUER_URL"] + "/idp/profile/Logout")
+# endregion
 
 
+# region Websockets connect and disconnect
 @sio.on('connect')
 def WebSocketsConnect():
     log("WebSockets client connected.", request)
@@ -189,6 +192,20 @@ def WebSocketsConnect():
 @sio.on('disconnect')
 def WebSocketsDisconnect():
     log("WebSockets client disconnected.", request)
+# endregion
+
+
+def ValidateSessionID(sessionID):
+    # TODO: proper validation
+    return (len(sessionID) == 5)
+
+
+def GenerateSessionCode():
+    sessionCode = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    if (sessionCode in sessions):
+        return GenerateSessionCode()
+    else:
+        return sessionCode
 
 
 @sio.on('message')
@@ -196,10 +213,26 @@ def HandleMessage(message):
     log("Received websockets message: " + str(message))
 
     if (message["type"] == "join_request" and message["role"] == HOST_ROLE):
-        send({"type": "host_request_response", "value": True})
+        session_code = GenerateSessionCode()
+        sessions[session_code] = {
+            "host_sid": request.sid,
+            "users": {
+                request.sid: {
+                    "username": message["username"],
+                    "role": HOST_ROLE
+                }
+            }
+        }
+
+        send({
+            "type": "host_request_response",
+            "value": True,
+            "session_code": session_code
+        })
 
 
-# Run app
+# region Run app
 if __name__ == '__main__':
     log("Initializing app...")
     sio.run(app, debug=True, use_reloader=False)
+# endregion

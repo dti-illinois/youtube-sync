@@ -8,8 +8,6 @@
 
     <h1>Welcome to Youtube-Sync!</h1>
 
-    <p>Invite others to join your session: <input type="text" id="sessionLink" placeholder="Session Link" /></p>
-
     <div class="modal fade" id="modalInvalidURL" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -61,8 +59,6 @@
       </div>
     </div>
 
-    <br><br>
-
     <div id="video-div">
         <video
             id="video-js"
@@ -84,5 +80,23 @@
                     <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
                 </p>
         </video>
+    </div>
+
+    <div class="controls-container">
+        <b>Current Users:</b><br>
+
+        Copy this link to invite others to your session:
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Session Link" id="sessionLink" readonly onclick="this.focus(); this.select();" style="background-color: white;">
+            <button class="btn btn-outline-dark" type="button" onclick="CopyLinkToClipboard();"><i class="far fa-copy"></i></button>
+        </div>
+    </div>
+
+    <div class="controls-container">
+        <b>Chat:</b>
+    </div>
+
+    <div class="controls-container" id="hostVideoControls">
+        <b>Video Controls:</b>
     </div>
 {% endblock %}

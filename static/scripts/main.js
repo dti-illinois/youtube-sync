@@ -90,3 +90,9 @@ function SubmitOnEnter(e, object) {
         document.getElementById(object).click();
     }
 }
+
+function CopyLinkToClipboard() {
+    document.getElementById("sessionLink").select();
+    document.getElementById("sessionLink").setSelectionRange(0, 999999);
+    document.execCommand("copy");
+}
